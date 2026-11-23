@@ -1,0 +1,2630 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Glute &amp; Leg Hypertrophy Tracker — Sara</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            gym: {
+              bg: '#09090b',
+              card: '#131318',
+              elevated: '#1e1e26',
+              border: '#272732',
+              rose: '#f43f5e',
+              coral: '#fb7185',
+              emerald: '#10b981'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Tema oscuro base y utilidades táctiles Mobile-First */
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #09090b;
+      color: #f4f4f5;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* Ocultar flechas nativas de inputs numéricos para estética limpia en móvil */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    /* Resplandores sutiles para temporizador y estado activo */
+    .glow-rose {
+      box-shadow: 0 0 22px rgba(244, 63, 94, 0.28);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.32);
+    }
+
+    /* Animación entrada barra flotante inferior */
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up {
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Animación suave para modales */
+    @keyframes fadeScaleIn {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .animate-modal-in {
+      animation: fadeScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-32 selection:bg-rose-500 selection:text-white">
+
+  <!-- ==================== ENCABEZADO STICKY ==================== -->
+  <header class="sticky top-0 z-30 bg-[#09090b]/92 backdrop-blur-md border-b border-[#272732]">
+    <div class="max-w-2xl mx-auto px-4 pt-3 pb-2.5">
+      <!-- Fila superior: Marca, Semana y Acciones -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f43f5e] to-[#fb7185] flex items-center justify-center text-white font-black shadow-lg shadow-rose-500/25 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white truncate">
+              Glute &amp; Leg Tracker — <span class="text-[#fb7185]">Sara</span>
+            </h1>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-[#f43f5e]/15 text-[#fb7185] border border-[#f43f5e]/30">
+                Semana <span id="weekNumberBadge" class="ml-1">1</span>
+              </span>
+              <span class="text-[11px] text-zinc-400 truncate">Guía Visual + Progreso</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción rápida -->
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- Abrir Temporizador -->
+          <button id="btnOpenTimer" type="button" title="Abrir temporizador" class="p-2.5 rounded-xl bg-[#131318] hover:bg-[#1e1e26] border border-[#272732] text-zinc-300 hover:text-[#fb7185] transition active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <circle cx="12" cy="13" r="8"></circle>
+              <path stroke-linecap="round" d="M12 9v4l2.5 2.5M9 2h6"></path>
+            </svg>
+          </button>
+
+          <!-- + Nueva Semana -->
+          <button id="btnNewWeek" type="button" title="Iniciar Nueva Semana" class="px-2.5 py-2 rounded-xl bg-[#131318] hover:bg-[#1e1e26] border border-[#272732] text-xs font-bold text-zinc-200 hover:text-[#10b981] transition flex items-center gap-1 active:scale-95">
+            <svg class="w-3.5 h-3.5 text-[#10b981]" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Nueva Semana</span>
+          </button>
+
+          <!-- Backup / Resumen -->
+          <button id="btnExport" type="button" title="Backup y Resumen" class="px-2.5 py-2 rounded-xl bg-[#131318] hover:bg-[#1e1e26] border border-[#272732] text-xs font-bold text-zinc-200 hover:text-[#fb7185] transition flex items-center gap-1.5 active:scale-95">
+            <svg class="w-3.5 h-3.5 text-[#f43f5e]" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span class="hidden sm:inline">Backup</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barras de Progreso en Tiempo Real: Hoy y Semana -->
+      <div class="grid grid-cols-2 gap-3 mt-2.5">
+        <div class="bg-[#131318] border border-[#272732] rounded-xl px-2.5 py-1.5">
+          <div class="flex justify-between items-center text-[11px] mb-1">
+            <span class="text-zinc-400 font-medium">Progreso Hoy</span>
+            <span id="dailyProgressText" class="font-extrabold text-[#fb7185] tabular-nums">0%</span>
+          </div>
+          <div class="w-full h-1.5 bg-[#1e1e26] rounded-full overflow-hidden">
+            <div id="dailyProgressBar" class="h-full bg-gradient-to-r from-[#f43f5e] to-[#fb7185] rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="bg-[#131318] border border-[#272732] rounded-xl px-2.5 py-1.5">
+          <div class="flex justify-between items-center text-[11px] mb-1">
+            <span class="text-zinc-400 font-medium">Progreso Semanal</span>
+            <span id="weeklyProgressText" class="font-extrabold text-[#10b981] tabular-nums">0%</span>
+          </div>
+          <div class="w-full h-1.5 bg-[#1e1e26] rounded-full overflow-hidden">
+            <div id="weeklyProgressBar" class="h-full bg-[#10b981] rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestañas Selector de Día (Lunes a Sábado) -->
+      <nav id="daySelector" aria-label="Días de entrenamiento" class="grid grid-cols-6 gap-1.5 mt-2.5">
+        <!-- Renderizado dinámico con JS -->
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+  <main class="max-w-2xl mx-auto px-4 pt-4 space-y-4">
+
+    <!-- Banner Resumen del Día Seleccionado -->
+    <section class="bg-[#131318] border border-[#272732] rounded-2xl p-4 relative overflow-hidden">
+      <div class="absolute -right-6 -top-6 w-32 h-32 bg-[#f43f5e]/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <span id="dayBadge" class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#f43f5e]/15 text-[#fb7185] border border-[#f43f5e]/30">
+              LUNES
+            </span>
+            <span id="dayOptionalBadge" class="hidden text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              Opcional • Día 6
+            </span>
+          </div>
+          <h2 id="dayTitle" class="text-lg sm:text-xl font-black text-white tracking-tight leading-snug">
+            Glúteo Principal
+          </h2>
+          <p id="daySubtitle" class="text-xs sm:text-sm text-zinc-400 mt-0.5">
+            Empuje de Cadera y Abducción
+          </p>
+        </div>
+        <div class="text-right shrink-0 bg-[#1e1e26] border border-[#272732] rounded-xl px-3 py-2">
+          <div id="daySetsCounter" class="text-sm font-black text-white tabular-nums">0 / 16</div>
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">series hoy</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist Colapsable de Activación Pre-Entreno (Visible en días de Pierna/Glúteo) -->
+    <section id="activationSection" class="bg-[#131318] border border-[#272732] rounded-2xl overflow-hidden transition-all">
+      <button id="toggleActivationBtn" type="button" aria-expanded="true" class="w-full p-3.5 flex items-center justify-between gap-3 text-left hover:bg-[#1e1e26]/60 transition">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-xl bg-[#f43f5e]/15 border border-[#f43f5e]/30 flex items-center justify-center text-[#fb7185] shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-xs sm:text-sm font-extrabold text-white truncate">
+              Activación Pre-Entreno (Cadera &amp; Glúteo)
+            </h3>
+            <p class="text-[11px] text-zinc-400 truncate">Movilidad articular y conexión mente-músculo</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <span id="activationProgressBadge" class="text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-[#1e1e26] border border-[#272732] text-zinc-300 tabular-nums">
+            0/3
+          </span>
+          <svg id="activationChevron" class="w-4 h-4 text-zinc-400 transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </button>
+
+      <!-- Lista de items de activación -->
+      <div id="activationBody" class="px-3.5 pb-3.5 pt-1 space-y-2 border-t border-[#272732]">
+        <label class="flex items-start gap-3 p-2.5 rounded-xl bg-[#1e1e26]/70 border border-[#272732] hover:border-[#f43f5e]/40 cursor-pointer transition select-none">
+          <input type="checkbox" data-activation-idx="0" class="activation-checkbox sr-only peer" />
+          <div class="w-5 h-5 mt-0.5 rounded-md border-2 border-zinc-600 peer-checked:border-[#10b981] peer-checked:bg-[#10b981] flex items-center justify-center transition shrink-0">
+            <svg class="w-3.5 h-3.5 text-[#09090b] opacity-0 peer-checked:opacity-100" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <span class="text-xs sm:text-sm text-zinc-200 peer-checked:text-zinc-500 peer-checked:line-through leading-snug">
+            5 min movilidad de cadera (rotaciones 90/90 y balanceos pélvicos)
+          </span>
+        </label>
+
+        <label class="flex items-start gap-3 p-2.5 rounded-xl bg-[#1e1e26]/70 border border-[#272732] hover:border-[#f43f5e]/40 cursor-pointer transition select-none">
+          <input type="checkbox" data-activation-idx="1" class="activation-checkbox sr-only peer" />
+          <div class="w-5 h-5 mt-0.5 rounded-md border-2 border-zinc-600 peer-checked:border-[#10b981] peer-checked:bg-[#10b981] flex items-center justify-center transition shrink-0">
+            <svg class="w-3.5 h-3.5 text-[#09090b] opacity-0 peer-checked:opacity-100" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <span class="text-xs sm:text-sm text-zinc-200 peer-checked:text-zinc-500 peer-checked:line-through leading-snug">
+            2 series de activación de glúteo medio (abducciones con banda o monster walks)
+          </span>
+        </label>
+
+        <label class="flex items-start gap-3 p-2.5 rounded-xl bg-[#1e1e26]/70 border border-[#272732] hover:border-[#f43f5e]/40 cursor-pointer transition select-none">
+          <input type="checkbox" data-activation-idx="2" class="activation-checkbox sr-only peer" />
+          <div class="w-5 h-5 mt-0.5 rounded-md border-2 border-zinc-600 peer-checked:border-[#10b981] peer-checked:bg-[#10b981] flex items-center justify-center transition shrink-0">
+            <svg class="w-3.5 h-3.5 text-[#09090b] opacity-0 peer-checked:opacity-100" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <span class="text-xs sm:text-sm text-zinc-200 peer-checked:text-zinc-500 peer-checked:line-through leading-snug">
+            1–2 series de aproximación progresiva en el primer ejercicio pesado
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Contenedor de Tarjetas de Ejercicios con Ilustraciones Estáticas -->
+    <section id="exercisesContainer" class="space-y-4" aria-label="Ejercicios del día">
+      <!-- Renderizado dinámico con JS -->
+    </section>
+
+  </main>
+
+  <!-- ==================== BARRA FLOTANTE INFERIOR: TEMPORIZADOR DE DESCANSO ==================== -->
+  <div id="restTimerBar" class="hidden fixed bottom-0 inset-x-0 z-40 p-3 animate-slide-up">
+    <div id="restTimerCard" class="max-w-2xl mx-auto bg-[#131318]/95 backdrop-blur-xl border border-[#f43f5e]/50 rounded-2xl p-3.5 shadow-2xl glow-rose">
+      <div class="w-full h-1.5 bg-[#1e1e26] rounded-full overflow-hidden mb-2.5">
+        <div id="timerProgressBar" class="h-full bg-gradient-to-r from-[#f43f5e] to-[#fb7185] transition-all duration-300" style="width: 100%"></div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span id="timerStatusDot" class="w-2 h-2 rounded-full bg-[#f43f5e] animate-ping"></span>
+            <p id="timerExerciseLabel" class="text-[11px] font-bold uppercase tracking-wider text-[#fb7185] truncate">
+              Descanso activo
+            </p>
+          </div>
+          <div class="flex items-baseline gap-2 mt-0.5">
+            <span id="timerDisplay" class="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
+              01:30
+            </span>
+            <span id="timerFinishedBadge" class="hidden text-xs font-extrabold uppercase px-2 py-0.5 rounded-md bg-[#10b981] text-[#09090b] animate-bounce">
+              ¡LISTA! ✨
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btnTimerMinus15" type="button" class="px-2.5 py-2.5 rounded-xl bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-xs font-bold text-zinc-200 active:scale-95 transition">
+            -15s
+          </button>
+          <button id="btnTimerPlus15" type="button" class="px-2.5 py-2.5 rounded-xl bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-xs font-bold text-[#fb7185] active:scale-95 transition">
+            +15s
+          </button>
+          <button id="btnTimerToggle" type="button" aria-label="Pausar o Reanudar" class="px-3 py-2.5 rounded-xl bg-[#f43f5e] hover:bg-[#fb7185] text-white text-xs font-extrabold flex items-center gap-1 active:scale-95 transition">
+            <svg id="iconTimerPause" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 5h4v14H6zm8 0h4v14h-4z"/>
+            </svg>
+            <svg id="iconTimerPlay" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span id="textTimerToggle" class="hidden sm:inline">Pausar</span>
+          </button>
+          <button id="btnTimerClose" type="button" title="Cerrar temporizador" class="p-2.5 rounded-xl bg-[#1e1e26] hover:bg-rose-500/20 border border-[#272732] text-zinc-400 hover:text-[#fb7185] active:scale-95 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL ZOOM: ILUSTRACIÓN + EJECUCIÓN PASO A PASO ==================== -->
+  <div id="modalIllustrationZoom" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="zoomModalTitle">
+    <div class="bg-[#131318] border border-[#272732] rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto animate-modal-in">
+      <!-- Cabecera del Modal -->
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="zoomMuscleBadge" class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#f43f5e]/15 text-[#fb7185] border border-[#f43f5e]/35">
+              Glúteo Mayor
+            </span>
+            <span id="zoomMetaBadge" class="text-xs font-bold text-zinc-400">
+              4 series × 8-10 • 120s
+            </span>
+          </div>
+          <h3 id="zoomModalTitle" class="text-lg font-black text-white leading-snug">
+            Nombre del Ejercicio
+          </h3>
+        </div>
+        <button id="btnCloseZoomModal" type="button" aria-label="Cerrar vista ampliada" class="p-2.5 rounded-xl bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-zinc-300 hover:text-white shrink-0 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Lienzo Ampliado de la Ilustración SVG Estática -->
+      <div class="bg-[#09090b] border border-[#272732] rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden">
+        <div id="zoomSvgContainer" class="w-full max-w-sm">
+          <!-- SVG inyectado dinámicamente -->
+        </div>
+        <div class="mt-2 flex items-center gap-3 text-[11px] text-zinc-400">
+          <span class="inline-flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#f43f5e]"></span>
+            Músculo principal activo
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#fb7185]"></span>
+            Dirección del movimiento
+          </span>
+        </div>
+      </div>
+
+      <!-- Ejecución Paso a Paso -->
+      <div class="bg-[#1e1e26]/80 border border-[#272732] rounded-xl p-3.5 space-y-2">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#fb7185] flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Ejecución Paso a Paso
+        </h4>
+        <ol id="zoomFormCuesList" class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-zinc-200 leading-relaxed">
+          <!-- Pasos renderizados dinámicamente -->
+        </ol>
+      </div>
+
+      <!-- Ajuste de Máquina / Equipo -->
+      <div class="bg-[#1e1e26]/80 border border-[#272732] rounded-xl p-3.5 space-y-1.5">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          Ajuste de Máquina y Postura Inicial
+        </h4>
+        <p id="zoomMachineSetup" class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+          Detalles de ajuste de máquina.
+        </p>
+      </div>
+
+      <button id="btnBottomCloseZoom" type="button" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#f43f5e] to-[#fb7185] hover:opacity-95 text-white text-xs font-extrabold uppercase tracking-wider transition">
+        Entendido, volver al entreno
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: + NUEVA SEMANA ==================== -->
+  <div id="modalNewWeek" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#131318] border border-[#272732] rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 animate-modal-in">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[#10b981]/15 border border-[#10b981]/30 flex items-center justify-center text-[#10b981] shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-white">Iniciar Nueva Semana</h3>
+          <p class="text-xs text-zinc-400">Sobrecarga progresiva para Sara</p>
+        </div>
+      </div>
+
+      <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+        ¿Lista para comenzar la <strong class="text-white">Semana <span id="nextWeekPreview">2</span></strong>? Se desmarcarán todos los checks de series y activación pre-entreno de los 6 días.
+        <span class="block mt-2 text-[#10b981] font-semibold">
+          ✓ Todos tus pesos (kg), repeticiones y notas de máquina permanecen guardados para que superes tus marcas.
+        </span>
+      </p>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="btnCancelNewWeek" type="button" class="px-4 py-2.5 rounded-xl bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-xs font-bold text-zinc-300 transition">
+          Cancelar
+        </button>
+        <button id="btnConfirmNewWeek" type="button" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#f43f5e] to-[#fb7185] hover:opacity-95 text-xs font-extrabold text-white shadow-lg shadow-rose-500/25 transition">
+          Confirmar Nueva Semana
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: BACKUP / RESUMEN SEMANAL ==================== -->
+  <div id="modalExport" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#131318] border border-[#272732] rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 max-h-[90vh] flex flex-col animate-modal-in">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-extrabold text-white">Backup &amp; Resumen — Sara</h3>
+          <p class="text-xs text-zinc-400">Copia tu resumen de entrenos o guarda una copia JSON</p>
+        </div>
+        <button id="btnCloseExport" type="button" class="p-2 rounded-xl bg-[#1e1e26] border border-[#272732] text-zinc-400 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <textarea id="exportSummaryText" readonly rows="10" class="w-full rounded-xl bg-[#09090b] border border-[#272732] p-3 text-xs font-mono text-zinc-300 focus:outline-none resize-none"></textarea>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <button id="btnCopySummary" type="button" class="px-4 py-3 rounded-xl bg-[#f43f5e] hover:bg-[#fb7185] text-white text-xs font-extrabold flex items-center justify-center gap-2 transition active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+          </svg>
+          Copiar Resumen Texto
+        </button>
+
+        <button id="btnDownloadJson" type="button" class="px-4 py-3 rounded-xl bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-white text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95">
+          <svg class="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Exportar Respaldo (.JSON)
+        </button>
+      </div>
+
+      <div class="pt-2 border-t border-[#272732] flex items-center justify-between gap-2">
+        <span class="text-[11px] text-zinc-400">¿Restaurar un backup previo?</span>
+        <label class="px-3 py-1.5 rounded-lg bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-[11px] font-bold text-[#fb7185] cursor-pointer transition">
+          Importar .JSON
+          <input id="inputRestoreJson" type="file" accept=".json,application/json" class="hidden" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST FLOTANTE ==================== -->
+  <div id="toastNotification" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-[#131318] border border-[#f43f5e]/60 text-xs font-bold text-white shadow-2xl flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-[#f43f5e]"></span>
+    <span id="toastMessage">Guardado</span>
+  </div>
+
+  <!-- ==================== LÓGICA E ILUSTRACIONES SVG ESTÁTICAS ==================== -->
+  <script>
+    /**
+     * CLAVE ÚNICA DE LOCALSTORAGE PARA SARA (VISUAL TRACKER)
+     */
+    const STORAGE_KEY = 'sara_glute_visual_tracker_v1';
+
+    /**
+     * BIBLIOTECA DE 29 ILUSTRACIONES SVG ESTÁTICAS (viewBox="0 0 180 120")
+     * Convenciones cromáticas:
+     * - Suelo / guías: #27273a
+     * - Equipamiento de gimnasio: #475569, #64748b, #94a3b8
+     * - Silueta atlética femenina: #e2e8f0 / #cbd5e1
+     * - Zona muscular activa: #f43f5e (con halo #fb7185)
+     * - Flechas de trayectoria: #fb7185
+     */
+    const EXERCISE_SVGS = {
+      // 1. Hip Thrust (Barra o Máquina)
+      lun_1: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="104" x2="168" y2="104" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco plano -->
+          <rect x="18" y="64" width="44" height="8" rx="3" fill="#64748b"/>
+          <rect x="24" y="72" width="6" height="32" rx="2" fill="#475569"/>
+          <rect x="50" y="72" width="6" height="32" rx="2" fill="#475569"/>
+          <!-- Silueta puente -->
+          <circle cx="48" cy="48" r="7.5" fill="#e2e8f0"/>
+          <path d="M41 45 Q35 46 34 53" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M55 62 L86 60 L114 62 L116 102" stroke="#e2e8f0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M62 60 L78 58" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M111 102 L126 102" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
+          <!-- Zona Glúteo Mayor iluminada -->
+          <ellipse cx="80" cy="66" rx="13" ry="8" fill="#f43f5e" fill-opacity="0.35"/>
+          <ellipse cx="80" cy="66" rx="9" ry="5.5" fill="#f43f5e"/>
+          <!-- Barra y discos en cadera -->
+          <line x1="86" y1="42" x2="86" y2="78" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="86" cy="60" r="15" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+          <circle cx="86" cy="60" r="10" fill="#64748b" stroke="#cbd5e1" stroke-width="1.2"/>
+          <circle cx="86" cy="60" r="3" fill="#09090b"/>
+          <!-- Flecha ascenso cadera -->
+          <path d="M86 38 L86 20 M81 25 L86 19 L91 25" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 2. Sentadilla Búlgara (Enfoque Glúteo)
+      lun_2: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco trasero -->
+          <rect x="18" y="72" width="38" height="7" rx="3" fill="#64748b"/>
+          <rect x="23" y="79" width="5" height="27" rx="1.5" fill="#475569"/>
+          <rect x="46" y="79" width="5" height="27" rx="1.5" fill="#475569"/>
+          <!-- Pierna trasera elevada -->
+          <path d="M46 70 L64 92 L82 66" stroke="#94a3b8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Torso inclinado adelante y pierna delantera -->
+          <circle cx="106" cy="24" r="7.5" fill="#e2e8f0"/>
+          <path d="M99 21 Q93 22 91 29" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M101 34 L82 66 L122 72 L122 104" stroke="#e2e8f0" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M118 104 L133 104" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
+          <!-- Glúteo y cuádriceps iluminados -->
+          <ellipse cx="83" cy="67" rx="12" ry="8" fill="#f43f5e" fill-opacity="0.35"/>
+          <ellipse cx="83" cy="67" rx="8.5" ry="5.5" fill="#f43f5e"/>
+          <ellipse cx="104" cy="69" rx="11" ry="4.5" fill="#fb7185" fill-opacity="0.7"/>
+          <!-- Brazos y mancuernas -->
+          <path d="M101 36 L101 66" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <rect x="93" y="65" width="16" height="6" rx="2.5" fill="#94a3b8"/>
+          <rect x="92" y="63" width="4" height="10" rx="1.5" fill="#64748b"/>
+          <rect x="106" y="63" width="4" height="10" rx="1.5" fill="#64748b"/>
+          <!-- Flecha movimiento vertical -->
+          <path d="M148 44 L148 76 M143 49 L148 43 L153 49 M143 71 L148 77 L153 71" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 3. Patada de Glúteo en Polea Baja
+      lun_3: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Torre de polea baja -->
+          <rect x="26" y="14" width="10" height="92" rx="2" fill="#475569"/>
+          <rect x="20" y="100" width="22" height="6" rx="2" fill="#64748b"/>
+          <circle cx="34" cy="96" r="4.5" fill="#94a3b8"/>
+          <!-- Pierna de apoyo -->
+          <path d="M84 62 L80 104" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+          <path d="M72 104 L85 104" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Silueta inclinada sujetando torre y patada atrás -->
+          <circle cx="62" cy="36" r="7.5" fill="#e2e8f0"/>
+          <path d="M68 33 Q74 34 76 41" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M66 44 L86 62 L138 74" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M64 46 L37 52" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Cable tenso y tobillera -->
+          <line x1="38" y1="96" x2="136" y2="75" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="3 2"/>
+          <rect x="133" y="70" width="7" height="8" rx="2" fill="#64748b"/>
+          <!-- Glúteo activo -->
+          <ellipse cx="90" cy="60" rx="12" ry="8" fill="#f43f5e" fill-opacity="0.35"/>
+          <ellipse cx="90" cy="60" rx="8.5" ry="5.5" fill="#f43f5e"/>
+          <!-- Flecha curva patada -->
+          <path d="M126 94 Q144 88 150 68 M144 72 L150 67 L154 74" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 4. Abducción de Cadera en Máquina
+      lun_4: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Máquina de abducción (vista frontal/3-4) -->
+          <rect x="136" y="22" width="18" height="84" rx="3" fill="#475569"/>
+          <rect x="139" y="34" width="12" height="36" rx="1" fill="#64748b"/>
+          <rect x="64" y="34" width="42" height="40" rx="6" fill="#475569"/>
+          <rect x="60" y="72" width="50" height="8" rx="3" fill="#64748b"/>
+          <rect x="81" y="80" width="8" height="26" rx="2" fill="#475569"/>
+          <!-- Silueta sentada abduciendo rodillas -->
+          <circle cx="85" cy="24" r="7.5" fill="#e2e8f0"/>
+          <path d="M85 33 L85 68" stroke="#e2e8f0" stroke-width="13" stroke-linecap="round"/>
+          <!-- Muslos abiertos hacia afuera -->
+          <path d="M80 68 L54 76 L52 102" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M90 68 L116 76 L118 102" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Almohadillas laterales -->
+          <rect x="44" y="68" width="7" height="16" rx="3" fill="#94a3b8"/>
+          <rect x="119" y="68" width="7" height="16" rx="3" fill="#94a3b8"/>
+          <!-- Glúteo medio iluminado -->
+          <ellipse cx="70" cy="68" rx="9" ry="6" fill="#f43f5e"/>
+          <ellipse cx="100" cy="68" rx="9" ry="6" fill="#f43f5e"/>
+          <!-- Flechas hacia afuera -->
+          <path d="M40 76 L24 76 M29 71 L23 76 L29 81" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M130 76 L146 76 M141 71 L147 76 L141 81" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 5. Hiperextensiones en Banco Romano (Glúteo)
+      lun_5: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco romano 45° -->
+          <line x1="34" y1="98" x2="86" y2="62" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+          <line x1="68" y1="74" x2="82" y2="106" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+          <rect x="26" y="92" width="14" height="14" rx="2" fill="#475569"/>
+          <rect x="74" y="56" width="16" height="10" rx="4" fill="#94a3b8" transform="rotate(-32 74 56)"/>
+          <!-- Silueta en bisagra 45° con espalda alta ligeramente redondeada -->
+          <path d="M38 92 L82 60" stroke="#e2e8f0" stroke-width="9.5" stroke-linecap="round"/>
+          <path d="M82 60 Q106 42 126 36" stroke="#e2e8f0" stroke-width="10.5" stroke-linecap="round"/>
+          <circle cx="135" cy="34" r="7.5" fill="#e2e8f0"/>
+          <path d="M112 42 L104 54" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Glúteo e isquios iluminados -->
+          <ellipse cx="78" cy="60" rx="13" ry="7.5" transform="rotate(-30 78 60)" fill="#f43f5e"/>
+          <!-- Flecha curva ascenso -->
+          <path d="M122 68 Q138 56 144 40 M138 44 L144 39 L148 46" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 6. Jalón al Pecho (Agarre Prono)
+      mar_1: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Máquina Jalón -->
+          <rect x="24" y="14" width="16" height="92" rx="2" fill="#475569"/>
+          <line x1="32" y1="14" x2="104" y2="14" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="94" cy="17" r="4" fill="#94a3b8"/>
+          <rect x="76" y="76" width="36" height="7" rx="3" fill="#64748b"/>
+          <rect x="91" y="83" width="6" height="23" rx="2" fill="#475569"/>
+          <rect x="74" y="64" width="12" height="6" rx="3" fill="#94a3b8"/>
+          <!-- Silueta sentada jalando barra -->
+          <circle cx="94" cy="30" r="7" fill="#e2e8f0"/>
+          <path d="M94 39 L94 74 L74 74 L74 104" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Dorsales iluminados -->
+          <ellipse cx="87" cy="52" rx="5.5" ry="11" fill="#f43f5e"/>
+          <ellipse cx="101" cy="52" rx="5.5" ry="11" fill="#f43f5e"/>
+          <!-- Cable y barra ancha -->
+          <line x1="94" y1="21" x2="94" y2="43" stroke="#94a3b8" stroke-width="1.8"/>
+          <line x1="66" y1="43" x2="122" y2="43" stroke="#cbd5e1" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M86 44 L70 43 M102 44 L118 43" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Flechas hacia abajo -->
+          <path d="M60 28 L60 44 M56 40 L60 45 L64 40" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M128 28 L128 44 M124 40 L128 45 L132 40" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 7. Remo Sentado en Polea (Agarre Neutro)
+      mar_2: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Torre polea y banco largo -->
+          <rect x="22" y="20" width="12" height="86" rx="2" fill="#475569"/>
+          <circle cx="34" cy="68" r="4.5" fill="#94a3b8"/>
+          <line x1="48" y1="74" x2="48" y2="94" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+          <rect x="54" y="84" width="84" height="7" rx="3" fill="#64748b"/>
+          <rect x="64" y="91" width="6" height="15" rx="2" fill="#475569"/>
+          <rect x="122" y="91" width="6" height="15" rx="2" fill="#475569"/>
+          <!-- Silueta sentada remando -->
+          <circle cx="110" cy="34" r="7.5" fill="#e2e8f0"/>
+          <path d="M116 31 Q122 32 124 39" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M110 44 L110 78 L52 78" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Espalda media iluminada -->
+          <ellipse cx="112" cy="54" rx="6" ry="11" fill="#f43f5e"/>
+          <!-- Brazo remando y cable -->
+          <line x1="38" y1="68" x2="94" y2="62" stroke="#94a3b8" stroke-width="1.8"/>
+          <path d="M110 46 L124 58 L95 62" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Flecha atrás -->
+          <path d="M68 50 L92 50 M87 45 L93 50 L87 55" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 8. Press Militar con Mancuernas
+      mar_3: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco vertical -->
+          <rect x="74" y="36" width="32" height="42" rx="5" fill="#475569"/>
+          <rect x="68" y="76" width="44" height="7" rx="3" fill="#64748b"/>
+          <rect x="87" y="83" width="6" height="23" rx="2" fill="#475569"/>
+          <!-- Silueta sentada presionando arriba -->
+          <circle cx="90" cy="34" r="7.5" fill="#e2e8f0"/>
+          <path d="M90 43 L90 76" stroke="#e2e8f0" stroke-width="13" stroke-linecap="round"/>
+          <path d="M84 76 L68 78 L66 104" stroke="#cbd5e1" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M96 76 L112 78 L114 104" stroke="#cbd5e1" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Hombros iluminados -->
+          <circle cx="78" cy="45" r="6.5" fill="#f43f5e"/>
+          <circle cx="102" cy="45" r="6.5" fill="#f43f5e"/>
+          <!-- Brazos y mancuernas arriba -->
+          <path d="M78 45 L72 22 M102 45 L108 22" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <rect x="63" y="18" width="18" height="6" rx="2.5" fill="#94a3b8"/>
+          <rect x="99" y="18" width="18" height="6" rx="2.5" fill="#94a3b8"/>
+          <!-- Flechas hacia arriba -->
+          <path d="M54 36 L54 18 M50 22 L54 17 L58 22" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M126 36 L126 18 M122 22 L126 17 L130 22" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 9. Elevaciones Laterales con Mancuernas
+      mar_4: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Silueta de pie en T -->
+          <circle cx="90" cy="22" r="7.5" fill="#e2e8f0"/>
+          <path d="M90 31 L90 66" stroke="#e2e8f0" stroke-width="13" stroke-linecap="round"/>
+          <path d="M85 66 L82 104 M95 66 L98 104" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round"/>
+          <!-- Deltoides laterales iluminados -->
+          <circle cx="77" cy="38" r="6.5" fill="#f43f5e"/>
+          <circle cx="103" cy="38" r="6.5" fill="#f43f5e"/>
+          <!-- Brazos abiertos a 90° -->
+          <path d="M77 38 L44 42 M103 38 L136 42" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <rect x="36" y="38" width="12" height="6" rx="2" fill="#94a3b8"/>
+          <rect x="132" y="38" width="12" height="6" rx="2" fill="#94a3b8"/>
+          <!-- Flechas curvas de abducción de hombro -->
+          <path d="M48 66 Q40 56 42 46 M38 50 L42 45 L46 50" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M132 66 Q140 56 138 46 M134 50 L138 45 L142 50" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 10. Plancha Abdominal RKC
+      mar_5: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Colchoneta -->
+          <rect x="20" y="94" width="140" height="6" rx="3" fill="#475569"/>
+          <!-- Silueta en plancha rígida -->
+          <circle cx="138" cy="56" r="7.5" fill="#e2e8f0"/>
+          <path d="M131 53 Q125 54 123 60" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M36 92 L84 74 L128 66" stroke="#e2e8f0" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M126 68 L124 91 L142 91" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Core iluminado -->
+          <ellipse cx="98" cy="74" rx="18" ry="6" transform="rotate(-12 98 74)" fill="#f43f5e"/>
+          <!-- Flechas de tensión isométrica -->
+          <path d="M84 56 L106 52 M101 48 L107 52 L102 57" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M98 88 L98 79" stroke="#fb7185" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      `,
+
+      // 11. Sentadilla Hack / Smith / Libre Profunda
+      mie_1: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Estructura Hack Squat 45° -->
+          <line x1="42" y1="104" x2="116" y2="18" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+          <line x1="34" y1="90" x2="54" y2="106" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+          <rect x="64" y="42" width="12" height="36" rx="4" transform="rotate(38 64 42)" fill="#475569"/>
+          <!-- Silueta en sentadilla profunda -->
+          <circle cx="88" cy="36" r="7.5" fill="#e2e8f0"/>
+          <path d="M80 44 L58 74 L86 70 L50 96" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Cuádriceps y glúteo iluminados -->
+          <ellipse cx="74" cy="71" rx="11" ry="5" fill="#f43f5e"/>
+          <ellipse cx="58" cy="76" rx="9" ry="6" fill="#fb7185"/>
+          <!-- Flecha 45° -->
+          <path d="M112 58 L128 38 M121 40 L128 37 L129 45" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 12. Prensa Inclinada 45° (Pies Medios/Bajos)
+      mie_2: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Prensa 45° -->
+          <line x1="58" y1="86" x2="132" y2="26" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+          <rect x="30" y="54" width="10" height="36" rx="4" transform="rotate(-22 30 54)" fill="#64748b"/>
+          <rect x="38" y="84" width="28" height="7" rx="3" fill="#64748b"/>
+          <!-- Carro con discos -->
+          <line x1="108" y1="36" x2="128" y2="62" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="132" cy="40" r="14" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+          <!-- Silueta empujando -->
+          <circle cx="34" cy="44" r="7.5" fill="#e2e8f0"/>
+          <path d="M40 52 L56 82 L82 62 L114 52" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Cuádriceps iluminado -->
+          <ellipse cx="96" cy="57" rx="13" ry="5.5" transform="rotate(-18 96 57)" fill="#f43f5e"/>
+          <!-- Flecha empuje 45° -->
+          <path d="M124 22 L142 10 M135 9 L143 9 L140 16" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 13. Zancadas Caminando con Mancuernas
+      mie_3: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Pierna trasera -->
+          <path d="M82 66 L64 94 L42 104" stroke="#94a3b8" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Torso recto y pierna delantera 90° -->
+          <circle cx="84" cy="24" r="7.5" fill="#e2e8f0"/>
+          <path d="M77 21 Q71 22 69 29" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M84 34 L84 66 L120 72 L120 104" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M116 104 L131 104" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
+          <!-- Cuádriceps y glúteo iluminados -->
+          <ellipse cx="103" cy="69" rx="12" ry="5" fill="#f43f5e"/>
+          <ellipse cx="83" cy="66" rx="9" ry="6" fill="#fb7185"/>
+          <!-- Mancuernas -->
+          <path d="M84 36 L84 66" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <rect x="76" y="65" width="16" height="6" rx="2.5" fill="#94a3b8"/>
+          <!-- Flecha paso adelante -->
+          <path d="M138 66 L154 66 M149 61 L155 66 L149 71" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 14. Extensión de Cuádriceps en Máquina
+      mie_4: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Máquina de extensión -->
+          <rect x="20" y="24" width="16" height="82" rx="2" fill="#475569"/>
+          <rect x="50" y="36" width="10" height="42" rx="4" fill="#64748b"/>
+          <rect x="50" y="76" width="44" height="7" rx="3" fill="#64748b"/>
+          <rect x="74" y="83" width="6" height="23" rx="2" fill="#475569"/>
+          <circle cx="94" cy="78" r="5" fill="#94a3b8"/>
+          <line x1="94" y1="78" x2="136" y2="76" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+          <!-- Silueta sentada extendiendo piernas -->
+          <circle cx="64" cy="26" r="7.5" fill="#e2e8f0"/>
+          <path d="M64 36 L64 72 L136 72" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="136" cy="77" r="5" fill="#94a3b8"/>
+          <!-- Cuádriceps iluminado -->
+          <ellipse cx="94" cy="69" rx="15" ry="5.5" fill="#f43f5e"/>
+          <!-- Flecha arco subida -->
+          <path d="M124 96 Q138 90 144 76 M139 80 L144 75 L148 81" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 15. Elevación de Talones (Gemelos)
+      mie_5: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Escalón / Step -->
+          <rect x="66" y="92" width="48" height="14" rx="3" fill="#475569" stroke="#64748b" stroke-width="1.5"/>
+          <!-- Silueta en puntillas -->
+          <circle cx="90" cy="20" r="7.5" fill="#e2e8f0"/>
+          <path d="M83 17 Q77 18 75 25" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M90 30 L90 62 L92 84 L102 91" stroke="#e2e8f0" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Gemelo iluminado -->
+          <ellipse cx="86" cy="72" rx="6" ry="11" fill="#f43f5e"/>
+          <!-- Flecha vertical arriba -->
+          <path d="M122 88 L122 64 M117 69 L122 63 L127 69" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 16. Press Inclinado con Mancuernas
+      jue_1: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco inclinado 30° -->
+          <line x1="68" y1="84" x2="122" y2="54" stroke="#64748b" stroke-width="7" stroke-linecap="round"/>
+          <rect x="46" y="82" width="24" height="7" rx="3" fill="#64748b"/>
+          <line x1="108" y1="62" x2="116" y2="106" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+          <line x1="56" y1="89" x2="56" y2="106" stroke="#475569" stroke-width="5" stroke-linecap="round"/>
+          <!-- Silueta reclinada -->
+          <circle cx="122" cy="42" r="7.5" fill="#e2e8f0"/>
+          <path d="M114 49 L72 76 L46 78 L42 104" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Pecho superior iluminado -->
+          <ellipse cx="102" cy="54" rx="9" ry="5.5" transform="rotate(-28 102 54)" fill="#f43f5e"/>
+          <!-- Brazo y mancuerna arriba -->
+          <path d="M104 52 L102 24" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <rect x="92" y="20" width="20" height="6" rx="2.5" fill="#94a3b8"/>
+          <!-- Flecha arriba -->
+          <path d="M80 42 L80 22 M76 26 L80 21 L84 26" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 17. Remo Unilateral con Mancuerna
+      jue_2: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco plano -->
+          <rect x="40" y="74" width="88" height="7" rx="3" fill="#64748b"/>
+          <rect x="48" y="81" width="6" height="25" rx="2" fill="#475569"/>
+          <rect x="114" y="81" width="6" height="25" rx="2" fill="#475569"/>
+          <!-- Pierna de apoyo en suelo y rodilla en banco -->
+          <path d="M62 52 L50 104" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+          <path d="M64 52 L66 72 L46 72" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Espalda paralela y mano apoyada -->
+          <circle cx="122" cy="46" r="7.5" fill="#e2e8f0"/>
+          <path d="M64 50 L112 48" stroke="#e2e8f0" stroke-width="11" stroke-linecap="round"/>
+          <path d="M110 50 L112 72" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Dorsal iluminado -->
+          <ellipse cx="88" cy="49" rx="14" ry="5.5" fill="#f43f5e"/>
+          <!-- Brazo remando hacia cadera -->
+          <path d="M104 49 L86 38 L82 64" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="74" y="63" width="16" height="6" rx="2.5" fill="#94a3b8"/>
+          <!-- Flecha arriba -->
+          <path d="M68 68 L68 50 M64 54 L68 49 L72 54" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 18. Face Pull en Polea Alta
+      jue_3: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Polea alta -->
+          <rect x="26" y="14" width="12" height="92" rx="2" fill="#475569"/>
+          <circle cx="38" cy="34" r="4.5" fill="#94a3b8"/>
+          <!-- Silueta de pie jalando cuerda al rostro -->
+          <circle cx="114" cy="32" r="7.5" fill="#e2e8f0"/>
+          <path d="M121 29 Q127 30 129 37" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M114 42 L116 72 L110 104 M116 72 L126 104" stroke="#e2e8f0" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Deltoide posterior iluminado -->
+          <circle cx="113" cy="43" r="6.5" fill="#f43f5e"/>
+          <!-- Cable y cuerda -->
+          <line x1="42" y1="34" x2="92" y2="34" stroke="#94a3b8" stroke-width="1.8"/>
+          <path d="M113 43 L100 32 L92 34" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Flecha hacia rostro -->
+          <path d="M64 24 L86 24 M81 19 L87 24 L81 29" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 19. Superserie: Curl Bíceps + Extensión Tríceps Polea
+      jue_4: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <line x1="90" y1="18" x2="90" y2="98" stroke="#27273a" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <!-- Izquierda: Curl Bíceps -->
+          <circle cx="44" cy="24" r="6.5" fill="#e2e8f0"/>
+          <path d="M44 33 L44 68 L40 104 M44 68 L48 104" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round"/>
+          <path d="M44 36 L44 54 L58 42" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <ellipse cx="48" cy="46" rx="4.5" ry="7" fill="#f43f5e"/>
+          <rect x="53" y="38" width="11" height="5" rx="2" fill="#94a3b8"/>
+          <path d="M66 56 Q68 48 64 42 M61 46 L64 41 L68 45" stroke="#fb7185" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Derecha: Tríceps Polea -->
+          <rect x="154" y="16" width="8" height="90" rx="2" fill="#475569"/>
+          <circle cx="154" cy="24" r="3.5" fill="#94a3b8"/>
+          <circle cx="126" cy="24" r="6.5" fill="#e2e8f0"/>
+          <path d="M126 33 L126 68 L122 104 M126 68 L130 104" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round"/>
+          <path d="M126 36 L128 52 L144 62" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="154" y1="24" x2="144" y2="62" stroke="#94a3b8" stroke-width="1.6"/>
+          <ellipse cx="123" cy="45" rx="4.5" ry="7" fill="#f43f5e"/>
+          <path d="M138 46 L142 60 M138 57 L142 61 L145 56" stroke="#fb7185" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 20. Elevaciones de Piernas (Silla Romana o Suelo)
+      jue_5: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Silla Romana vertical -->
+          <rect x="52" y="24" width="12" height="82" rx="3" fill="#475569"/>
+          <rect x="64" y="46" width="28" height="6" rx="2.5" fill="#64748b"/>
+          <!-- Silueta apoyada en antebrazos elevando piernas en L -->
+          <circle cx="70" cy="24" r="7.5" fill="#e2e8f0"/>
+          <path d="M68 34 L68 68 L128 68" stroke="#e2e8f0" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M68 38 L86 45" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Abdomen inferior iluminado -->
+          <ellipse cx="73" cy="62" rx="6" ry="9" fill="#f43f5e"/>
+          <!-- Flecha arco subida piernas -->
+          <path d="M108 92 Q126 86 132 72 M127 76 L132 71 L136 77" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 21. Peso Muerto Rumano (RDL Barra o Mancuernas)
+      vie_1: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Silueta en bisagra de cadera RDL -->
+          <circle cx="126" cy="48" r="7.5" fill="#e2e8f0"/>
+          <path d="M120 43 Q114 42 110 47" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <path d="M116 50 L62 56 L78 82 L76 104" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M72 104 L86 104" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
+          <!-- Isquios y glúteo iluminados -->
+          <ellipse cx="64" cy="58" rx="9" ry="6" fill="#f43f5e"/>
+          <ellipse cx="68" cy="72" rx="5.5" ry="11" transform="rotate(-18 68 72)" fill="#f43f5e"/>
+          <!-- Brazos pegados a espinillas y barra -->
+          <path d="M106 52 L102 82" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <circle cx="102" cy="82" r="13" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+          <circle cx="102" cy="82" r="3" fill="#09090b"/>
+          <!-- Flecha bisagra -->
+          <path d="M142 36 L142 64 M137 41 L142 35 L147 41 M137 59 L142 65 L147 59" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 22. Curl Femoral (Tumbado o Sentado)
+      vie_2: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Máquina curl femoral tumbado -->
+          <rect x="142" y="24" width="16" height="82" rx="2" fill="#475569"/>
+          <path d="M48 76 L86 72 L122 80" stroke="#64748b" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="64" y="75" width="6" height="31" rx="2" fill="#475569"/>
+          <rect x="108" y="79" width="6" height="27" rx="2" fill="#475569"/>
+          <!-- Silueta tumbada flexionando rodillas -->
+          <circle cx="128" cy="70" r="7" fill="#e2e8f0"/>
+          <path d="M120 74 L84 68 L56 72 L46 42" stroke="#e2e8f0" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="44" cy="44" r="5" fill="#94a3b8"/>
+          <line x1="56" y1="72" x2="44" y2="44" stroke="#94a3b8" stroke-width="3"/>
+          <!-- Isquiotibiales iluminados -->
+          <ellipse cx="52" cy="56" rx="5.5" ry="12" transform="rotate(-18 52 56)" fill="#f43f5e"/>
+          <!-- Flecha arco curl -->
+          <path d="M30 68 Q34 52 42 42 M37 44 L43 41 L43 48" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 23. Step-Ups Altos en Cajón o Banco
+      vie_3: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Cajón pliométrico alto -->
+          <rect x="94" y="68" width="52" height="38" rx="4" fill="#475569" stroke="#64748b" stroke-width="2"/>
+          <!-- Pierna trasera en aire -->
+          <path d="M88 54 L68 94" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+          <!-- Silueta subiendo al cajón -->
+          <circle cx="110" cy="20" r="7.5" fill="#e2e8f0"/>
+          <path d="M106 29 L88 54 L118 54 L114 66" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Glúteo iluminado -->
+          <ellipse cx="90" cy="54" rx="10" ry="6.5" fill="#f43f5e"/>
+          <!-- Flecha ascenso -->
+          <path d="M156 64 L156 36 M151 41 L156 35 L161 41" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 24. Hip Thrust B-Stance (Unilateral)
+      vie_4: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="104" x2="168" y2="104" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco -->
+          <rect x="18" y="64" width="42" height="8" rx="3" fill="#64748b"/>
+          <rect x="24" y="72" width="6" height="32" rx="2" fill="#475569"/>
+          <rect x="48" y="72" width="6" height="32" rx="2" fill="#475569"/>
+          <!-- Pierna de apoyo escalonada (B-Stance) en segundo plano -->
+          <path d="M86 60 L124 72 L138 102" stroke="#64748b" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 2"/>
+          <!-- Silueta principal -->
+          <circle cx="48" cy="48" r="7.5" fill="#e2e8f0"/>
+          <path d="M55 62 L86 60 L110 62 L110 102" stroke="#e2e8f0" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M106 102 L120 102" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>
+          <!-- Glúteo unilateral iluminado -->
+          <ellipse cx="80" cy="66" rx="12" ry="7.5" fill="#f43f5e"/>
+          <!-- Barra -->
+          <circle cx="86" cy="60" r="14" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+          <circle cx="86" cy="60" r="3" fill="#09090b"/>
+          <!-- Flecha ascenso -->
+          <path d="M86 38 L86 20 M81 25 L86 19 L91 25" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 25. Abducción en Polea Baja
+      vie_5: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Columna polea baja -->
+          <rect x="32" y="16" width="10" height="90" rx="2" fill="#475569"/>
+          <circle cx="40" cy="96" r="4.5" fill="#94a3b8"/>
+          <!-- Silueta de pie barriendo pierna lateralmente -->
+          <circle cx="84" cy="24" r="7.5" fill="#e2e8f0"/>
+          <path d="M84 33 L84 64" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round"/>
+          <path d="M78 40 L42 50" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Pierna soporte y pierna abductora -->
+          <path d="M80 64 L78 104" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+          <path d="M89 64 L126 92" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round"/>
+          <!-- Cable bajo -->
+          <line x1="44" y1="96" x2="124" y2="92" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="3 2"/>
+          <!-- Glúteo medio iluminado -->
+          <ellipse cx="92" cy="62" rx="7" ry="6" fill="#f43f5e"/>
+          <!-- Flecha barrido lateral -->
+          <path d="M104 102 Q122 100 132 86 M126 88 L133 85 L134 92" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 26. Frog Pumps con Mancuerna
+      sab_1: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="18" y="98" width="144" height="6" rx="3" fill="#475569"/>
+          <!-- Silueta tumbada en rana (plantas juntas, rodillas abiertas) -->
+          <circle cx="34" cy="90" r="7.5" fill="#e2e8f0"/>
+          <path d="M43 94 L62 94 L88 78 L112 84 L128 95" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Glúteo bombeando -->
+          <ellipse cx="86" cy="83" rx="12" ry="7" fill="#f43f5e"/>
+          <!-- Mancuerna sobre cadera -->
+          <rect x="78" y="68" width="16" height="6" rx="2.5" fill="#94a3b8"/>
+          <rect x="76" y="66" width="4" height="10" rx="1.5" fill="#64748b"/>
+          <rect x="92" y="66" width="4" height="10" rx="1.5" fill="#64748b"/>
+          <!-- Flechas pulso rápido -->
+          <path d="M86 60 L86 44 M81 49 L86 43 L91 49" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 27. Abducciones con Banda (3 Inclinaciones)
+      sab_2: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Banco -->
+          <rect x="62" y="72" width="56" height="7" rx="3" fill="#64748b"/>
+          <rect x="87" y="79" width="6" height="27" rx="2" fill="#475569"/>
+          <!-- Silueta sentada abduciendo con banda -->
+          <circle cx="90" cy="24" r="7.5" fill="#e2e8f0"/>
+          <path d="M90 33 L90 68" stroke="#e2e8f0" stroke-width="13" stroke-linecap="round"/>
+          <path d="M84 68 L58 76 L56 104" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M96 68 L122 76 L124 104" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Banda elástica bajo rodillas -->
+          <rect x="54" y="76" width="72" height="5" rx="2.5" fill="#fb7185"/>
+          <!-- Glúteo medio iluminado -->
+          <ellipse cx="74" cy="68" rx="9" ry="5.5" fill="#f43f5e"/>
+          <ellipse cx="106" cy="68" rx="9" ry="5.5" fill="#f43f5e"/>
+          <!-- Flechas hacia afuera -->
+          <path d="M46 76 L28 76 M33 71 L27 76 L33 81" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M134 76 L152 76 M147 71 L153 76 L147 81" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 28. Aductores en Máquina
+      sab_3: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="12" y1="106" x2="168" y2="106" stroke="#27273a" stroke-width="2" stroke-linecap="round"/>
+          <!-- Máquina de aductores -->
+          <rect x="136" y="22" width="18" height="84" rx="3" fill="#475569"/>
+          <rect x="64" y="34" width="42" height="40" rx="6" fill="#475569"/>
+          <rect x="60" y="72" width="50" height="8" rx="3" fill="#64748b"/>
+          <rect x="81" y="80" width="8" height="26" rx="2" fill="#475569"/>
+          <!-- Silueta cerrando muslos -->
+          <circle cx="85" cy="24" r="7.5" fill="#e2e8f0"/>
+          <path d="M85 33 L85 68" stroke="#e2e8f0" stroke-width="13" stroke-linecap="round"/>
+          <path d="M82 68 L74 78 L72 104" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M88 68 L96 78 L98 104" stroke="#e2e8f0" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Almohadillas internas -->
+          <rect x="78" y="69" width="5" height="14" rx="2" fill="#94a3b8"/>
+          <rect x="87" y="69" width="5" height="14" rx="2" fill="#94a3b8"/>
+          <!-- Aductores iluminados -->
+          <ellipse cx="81" cy="74" rx="4.5" ry="7" fill="#f43f5e"/>
+          <ellipse cx="89" cy="74" rx="4.5" ry="7" fill="#f43f5e"/>
+          <!-- Flechas hacia adentro -->
+          <path d="M44 76 L62 76 M57 71 L63 76 L57 81" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M126 76 L108 76 M113 71 L107 76 L113 81" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `,
+
+      // 29. Dead Bug + Estiramiento 90/90
+      sab_4: `
+        <svg viewBox="0 0 180 120" class="w-full h-full block" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="16" y="98" width="148" height="6" rx="3" fill="#475569"/>
+          <!-- Silueta Dead Bug supina -->
+          <circle cx="44" cy="90" r="7.5" fill="#e2e8f0"/>
+          <path d="M54 94 L94 94" stroke="#e2e8f0" stroke-width="10.5" stroke-linecap="round"/>
+          <!-- Brazo y pierna opuestos extendidos -->
+          <path d="M56 90 L26 78" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M94 92 L144 86" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round"/>
+          <!-- Brazo y pierna a 90° -->
+          <path d="M62 88 L62 60" stroke="#cbd5e1" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M92 90 L92 66 L116 66" stroke="#94a3b8" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Core profundo y flexor de cadera iluminados -->
+          <ellipse cx="78" cy="91" rx="14" ry="5" fill="#f43f5e"/>
+          <!-- Flechas extensión opuesta -->
+          <path d="M42 72 L24 66 M29 63 L23 65 L27 71" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M126 76 L148 76 M143 71 L149 76 L143 81" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `
+    };
+
+    /**
+     * RUTINA COMPLETA DE 6 DÍAS (29 EJERCICIOS CON SUS ILUSTRACIONES, PASOS Y AJUSTES)
+     */
+    const ROUTINE_TEMPLATE = [
+      {
+        id: 'lunes',
+        short: 'LUN',
+        name: 'LUNES',
+        title: 'Glúteo Principal',
+        subtitle: 'Empuje de Cadera y Abducción',
+        hasActivation: true,
+        isOptional: false,
+        exercises: [
+          {
+            id: 'lun_1',
+            name: 'Hip Thrust (Barra o Máquina)',
+            setsCount: 4,
+            targetReps: '8-10',
+            restSeconds: 120,
+            muscleGroup: 'Glúteo Mayor',
+            shortTip: 'Barbilla al pecho, empuja con talones y sostén 1s arriba sin arquear lumbar.',
+            formCues: [
+              'Apoya el borde inferior de las escápulas sobre el banco y mantén la mirada al frente (barbilla ligeramente pegada al pecho).',
+              'Coloca los pies al ancho de hombros de modo que las espinillas queden verticales (90°) en la parte alta del movimiento.',
+              'Empuja explosivamente con los talones haciendo retroversión pélvica y aprieta glúteos 1 segundo arriba sin hiperextender la espalda baja.'
+            ],
+            machineSetup: 'Usa almohadilla gruesa sobre los pliegues de la cadera. En máquina de Hip Thrust, ajusta el cinturón firme a nivel pélvico y sitúa los pies en el centro-alto de la plataforma.'
+          },
+          {
+            id: 'lun_2',
+            name: 'Sentadilla Búlgara (Enfoque Glúteo)',
+            setsCount: 3,
+            targetReps: '10 / pierna',
+            restSeconds: 90,
+            muscleGroup: 'Glúteo y Cuádriceps',
+            shortTip: 'Paso largo e inclina el torso ~25° hacia adelante para estirar al máximo el glúteo.',
+            formCues: [
+              'Da un paso largo hacia adelante y apoya el empeine del pie trasero sobre el banco sin cargar peso en él.',
+              'Inclina el torso unos 25° hacia adelante manteniendo la espalda neutra y lleva la cadera hacia atrás al bajar.',
+              'Empuja con todo el pie delantero (especialmente el talón) para subir manteniendo la rodilla alineada con la punta del pie.'
+            ],
+            machineSetup: 'Utiliza un banco plano estándar (o rodillo acolchado de sentadilla búlgara). Si usas mancuernas, sujétalas a los lados con el abdomen firme.'
+          },
+          {
+            id: 'lun_3',
+            name: 'Patada de Glúteo en Polea Baja',
+            setsCount: 3,
+            targetReps: '12-15 / pierna',
+            restSeconds: 60,
+            muscleGroup: 'Glúteo Mayor',
+            shortTip: 'Torso ligeramente inclinado, abdomen firme y controla el regreso en 2 segundos.',
+            formCues: [
+              'Sujétate de la columna de la polea, inclina ligeramente el torso hacia adelante y bloquea la zona lumbar.',
+              'Lleva la pierna hacia atrás y ligeramente en diagonal (15°) sin girar la cadera ni impulsar con la espalda.',
+              'Haz una pausa breve en máxima contracción arriba y regresa lentamente sin que las placas choquen.'
+            ],
+            machineSetup: 'Coloca la polea en la posición más baja y ajusta firmemente la tobillera acolchada alrededor del tobillo.'
+          },
+          {
+            id: 'lun_4',
+            name: 'Abducción de Cadera en Máquina',
+            setsCount: 3,
+            targetReps: '15-20',
+            restSeconds: 60,
+            muscleGroup: 'Glúteo Medio',
+            shortTip: 'Inclínate ligeramente hacia adelante para enfocar la parte superior del glúteo.',
+            formCues: [
+              'Siéntate con el torso ligeramente inclinado hacia adelante sujetando los agarres frontales o laterales.',
+              'Abre las rodillas hacia afuera empujando con el lateral externo de los muslos, no con los pies.',
+              'Sostén 1 segundo en apertura máxima y regresa de forma controlada en 2 segundos.'
+            ],
+            machineSetup: 'Ajusta el rango de inicio de las almohadillas para que tus piernas comiencen ligeramente cerradas con tensión constante.'
+          },
+          {
+            id: 'lun_5',
+            name: 'Hiperextensiones en Banco Romano (Glúteo)',
+            setsCount: 3,
+            targetReps: '12-15',
+            restSeconds: 75,
+            muscleGroup: 'Glúteo e Isquios',
+            shortTip: 'Espalda alta redondeada, pies ligeramente hacia afuera y sube apretando glúteos.',
+            formCues: [
+              'Rota las puntas de los pies unos 30° hacia afuera y redondea suavemente la espalda alta (barbilla al pecho) para desactivar los lumbares.',
+              'Baja doblando únicamente desde la cadera hasta sentir estiramiento en isquios y glúteos.',
+              'Sube contrayendo fuerte los glúteos y detente justo cuando el cuerpo forme una línea recta (no subas de más).'
+            ],
+            machineSetup: 'Ajusta la almohadilla superior justo por debajo de los huesos de la cadera (crestas ilíacas) para permitir flexión libre de pelvis.'
+          }
+        ]
+      },
+      {
+        id: 'martes',
+        short: 'MAR',
+        name: 'MARTES',
+        title: 'Tren Superior A',
+        subtitle: 'Espalda y Hombro',
+        hasActivation: false,
+        isOptional: false,
+        exercises: [
+          {
+            id: 'mar_1',
+            name: 'Jalón al Pecho (Agarre Prono)',
+            setsCount: 3,
+            targetReps: '10-12',
+            restSeconds: 75,
+            muscleGroup: 'Dorsales (Espalda)',
+            shortTip: 'Toma la barra algo más ancho que hombros y llévala hacia la clavícula sacando pecho.',
+            formCues: [
+              'Agarra la barra ligeramente más ancho que tus hombros con palmas hacia adelante.',
+              'Inicia el movimiento deprimiendo los hombros (alejándolos de las orejas) e inclina el torso apenas 10–15° atrás.',
+              'Tira de los codos hacia abajo y atrás hasta llevar la barra a la parte alta del pecho.'
+            ],
+            machineSetup: 'Ajusta el rodillo acolchado sobre tus muslos de modo que tus piernas queden firmes y no se levanten con el peso.'
+          },
+          {
+            id: 'mar_2',
+            name: 'Remo Sentado en Polea (Agarre Neutro)',
+            setsCount: 3,
+            targetReps: '10-12',
+            restSeconds: 75,
+            muscleGroup: 'Espalda Media',
+            shortTip: 'Pecho erguido, jala el agarre V hacia el ombligo juntando escápulas.',
+            formCues: [
+              'Mantén las rodillas semi-flexionadas, la espalda recta y el pecho abierto durante toda la serie.',
+              'Lleva los codos pegados al cuerpo hacia atrás dirigiendo el agarre hacia el abdomen bajo.',
+              'Junta las escápulas 1 segundo al final y extiende los brazos adelante sin encorvar la zona lumbar.'
+            ],
+            machineSetup: 'Usa el agarre estrecho en V (neutro) en la polea baja con los pies firmes en la plataforma.'
+          },
+          {
+            id: 'mar_3',
+            name: 'Press Militar con Mancuernas',
+            setsCount: 3,
+            targetReps: '10-12',
+            restSeconds: 75,
+            muscleGroup: 'Hombros (Deltoides)',
+            shortTip: 'Codos ligeramente adelantados (plano escapular) y empuja sin arquear la espalda.',
+            formCues: [
+              'Sitúa las mancuernas a la altura de las orejas con los codos apuntando ligeramente hacia adelante (30°).',
+              'Empuja verticalmente hacia arriba hasta casi extender los codos sin chocar las mancuernas.',
+              'Baja de forma controlada en 2–3 segundos manteniendo el abdomen activo.'
+            ],
+            machineSetup: 'Coloca el respaldo del banco a 80–85° (casi vertical) y apoya firmemente la cabeza y espalda alta.'
+          },
+          {
+            id: 'mar_4',
+            name: 'Elevaciones Laterales con Mancuernas',
+            setsCount: 4,
+            targetReps: '12-15',
+            restSeconds: 60,
+            muscleGroup: 'Deltoide Lateral',
+            shortTip: 'Eleva liderando con los codos hasta la altura de los hombros sin balancearte.',
+            formCues: [
+              'De pie con leve inclinación del torso hacia adelante y codos suavemente flexionados.',
+              'Eleva los brazos hacia los lados pensando en alejar las mancuernas de tu cuerpo hasta formar una T.',
+              'Controla el descenso sin dejar caer los brazos de golpe.'
+            ],
+            machineSetup: 'Selecciona mancuernas ligeras-moderadas que te permitan completar las 12–15 reps con técnica estricta.'
+          },
+          {
+            id: 'mar_5',
+            name: 'Plancha Abdominal RKC',
+            setsCount: 3,
+            targetReps: '35-45 seg',
+            restSeconds: 45,
+            muscleGroup: 'Core / Abdomen',
+            shortTip: 'Aprieta glúteos y abdomen al máximo como si quisieras juntar codos y puntas de pies.',
+            formCues: [
+              'Apoya los antebrazos paralelos al ancho de hombros y extiende las piernas apoyando puntas de pies.',
+              'Haz retroversión pélvica (mete el coxis), contrae glúteos y tira isométricamente de los codos hacia los pies.',
+              'Mantén respiraciones cortas y controladas sin dejar caer la cadera.'
+            ],
+            machineSetup: 'Usa una colchoneta acolchada sobre superficie plana.'
+          }
+        ]
+      },
+      {
+        id: 'miercoles',
+        short: 'MIÉ',
+        name: 'MIÉRCOLES',
+        title: 'Cuádriceps y Glúteo',
+        subtitle: 'Patrón de Sentadilla',
+        hasActivation: true,
+        isOptional: false,
+        exercises: [
+          {
+            id: 'mie_1',
+            name: 'Sentadilla Hack / Smith / Libre Profunda',
+            setsCount: 4,
+            targetReps: '8-10',
+            restSeconds: 120,
+            muscleGroup: 'Cuádriceps y Glúteo',
+            shortTip: 'Baja profundo controlando en 3 segundos y sube explosiva sin bloquear rodillas.',
+            formCues: [
+              'Coloca los pies al ancho de hombros con las puntas ligeramente rotadas hacia afuera.',
+              'Desciende flexionando rodillas y cadera en simultáneo hasta romper el paralelo (muslos por debajo de la horizontal).',
+              'Empuja con fuerza toda la planta del pie manteniendo la espalda apoyada en el respaldo (en Hack) o el tronco firme.'
+            ],
+            machineSetup: 'En Hack Squat o Multipower, sitúa los pies en la zona media de la plataforma para equilibrar cuádriceps y glúteo profundo.'
+          },
+          {
+            id: 'mie_2',
+            name: 'Prensa Inclinada 45° (Pies Medios/Bajos)',
+            setsCount: 3,
+            targetReps: '10-12',
+            restSeconds: 90,
+            muscleGroup: 'Cuádriceps',
+            shortTip: 'Pies en posición media-baja; nunca despegues el glúteo ni el sacro del respaldo.',
+            formCues: [
+              'Posiciona los pies al ancho de hombros en la mitad media-baja de la plataforma para maximizar la flexión de rodilla.',
+              'Desbloquea los seguros y baja la plataforma hasta donde tu movilidad permita sin que el sacro se levante del asiento.',
+              'Empuja el carro hacia arriba deteniéndote justo antes de bloquear por completo las rodillas.'
+            ],
+            machineSetup: 'Ajusta el ángulo del respaldo en posición cómoda y sujeta firme las asas laterales durante toda la serie.'
+          },
+          {
+            id: 'mie_3',
+            name: 'Zancadas Caminando con Mancuernas',
+            setsCount: 3,
+            targetReps: '12 / pierna',
+            restSeconds: 75,
+            muscleGroup: 'Cuádriceps y Glúteo',
+            shortTip: 'Zancada fluida y controlada manteniendo la rodilla alineada con la punta del pie.',
+            formCues: [
+              'Da un paso amplio hacia adelante y baja verticalmente hasta que la rodilla trasera quede a pocos centímetros del suelo.',
+              'Impúlsate con la pierna delantera para enlazar directamente el siguiente paso manteniendo el equilibrio.',
+              'Evita que la rodilla delantera colapse hacia adentro.'
+            ],
+            machineSetup: 'Busca un pasillo despejado de 8–10 metros y usa agarres o straps si el agarre se fatiga antes que las piernas.'
+          },
+          {
+            id: 'mie_4',
+            name: 'Extensión de Cuádriceps en Máquina',
+            setsCount: 3,
+            targetReps: '12-15',
+            restSeconds: 60,
+            muscleGroup: 'Cuádriceps',
+            shortTip: 'Pausa 1 segundo arriba apretando el muslo y baja lento en 2–3 segundos.',
+            formCues: [
+              'Alinea el eje de rotación de tu rodilla con el eje metálico de la máquina.',
+              'Extiende ambas piernas hasta quedar rectas, sostén 1 segundo contrayendo el cuádriceps y baja controlado.',
+              'Mantén los glúteos pegados al asiento agarrando las asas inferiores.'
+            ],
+            machineSetup: 'Ajusta el respaldo para que la parte trasera de la rodilla toque el borde del asiento y el rodillo quede sobre el empeine bajo.'
+          },
+          {
+            id: 'mie_5',
+            name: 'Elevación de Talones (Gemelos)',
+            setsCount: 3,
+            targetReps: '15-20',
+            restSeconds: 45,
+            muscleGroup: 'Gemelos (Pantorrillas)',
+            shortTip: 'Estira bien abajo 1 segundo y sube al máximo sobre la punta de los pies.',
+            formCues: [
+              'Apoya únicamente la almohadilla delantera de los pies sobre el escalón dejando los talones libres.',
+              'Deja bajar los talones por debajo de la horizontal durante 1 segundo para estirar el tendón de Aquiles.',
+              'Sube explosivamente hasta quedar en punta de pies y sostén 1 segundo arriba.'
+            ],
+            machineSetup: 'Puede realizarse en máquina de gemelos de pie, en prensa inclinada o sobre un step sujetándote de un soporte.'
+          }
+        ]
+      },
+      {
+        id: 'jueves',
+        short: 'JUE',
+        name: 'JUEVES',
+        title: 'Tren Superior B + Core',
+        subtitle: 'Pecho, Espalda, Brazos y Abdomen',
+        hasActivation: false,
+        isOptional: false,
+        exercises: [
+          {
+            id: 'jue_1',
+            name: 'Press Inclinado con Mancuernas',
+            setsCount: 3,
+            targetReps: '10-12',
+            restSeconds: 75,
+            muscleGroup: 'Pecho Superior',
+            shortTip: 'Banco a 30°, codos a 45° del torso y controla la bajada hasta estirar el pecho.',
+            formCues: [
+              'Retrae ligeramente las escápulas contra el banco y apoya los pies firmes en el suelo.',
+              'Baja las mancuernas a los lados de la parte alta del pecho manteniendo los codos a unos 45° respecto al tronco.',
+              'Empuja hacia arriba y ligeramente hacia el centro sin perder la estabilidad de los hombros.'
+            ],
+            machineSetup: 'Ajusta el respaldo del banco regulable a 30° (primer o segundo punto de inclinación).'
+          },
+          {
+            id: 'jue_2',
+            name: 'Remo Unilateral con Mancuerna',
+            setsCount: 3,
+            targetReps: '10-12 / brazo',
+            restSeconds: 60,
+            muscleGroup: 'Dorsal y Espalda',
+            shortTip: 'Espalda plana paralela al suelo y lleva la mancuerna en arco hacia la cadera.',
+            formCues: [
+              'Apoya una mano y la rodilla del mismo lado sobre el banco plano manteniendo la espalda neutra.',
+              'Tira de la mancuerna en dirección hacia tu cadera (no hacia el hombro) para activar el dorsal ancho.',
+              'Baja controlando el estiramiento del dorsal sin rotar el tronco.'
+            ],
+            machineSetup: 'Usa un banco plano firme y coloca el pie de apoyo ligeramente abierto para mayor estabilidad.'
+          },
+          {
+            id: 'jue_3',
+            name: 'Face Pull en Polea Alta',
+            setsCount: 3,
+            targetReps: '15',
+            restSeconds: 60,
+            muscleGroup: 'Deltoide Posterior / Postura',
+            shortTip: 'Jala la cuerda hacia la frente separando las manos con codos altos.',
+            formCues: [
+              'Toma la cuerda con agarre neutro (pulgares apuntando hacia ti) y da dos pasos atrás.',
+              'Tira del centro de la cuerda hacia tu frente mientras separas las manos y mantienes los codos altos.',
+              'Aprieta la parte posterior de los hombros 1 segundo y regresa lento.'
+            ],
+            machineSetup: 'Ajusta la polea a la altura de tu rostro o ligeramente por encima usando el accesorio de cuerda doble.'
+          },
+          {
+            id: 'jue_4',
+            name: 'Superserie: Curl Bíceps + Extensión Tríceps Polea',
+            setsCount: 3,
+            targetReps: '12 c/u',
+            restSeconds: 60,
+            muscleGroup: 'Bíceps y Tríceps',
+            shortTip: 'Haz 12 curls con mancuernas y pasa directo a 12 extensiones de tríceps en polea.',
+            formCues: [
+              'Curl de bíceps: codos pegados a los costados, sube las mancuernas supinando las muñecas sin balancear la espalda.',
+              'Sin descanso, pasa a la polea alta con cuerda: codos fijos junto al torso y extiende completamente los brazos abriendo la cuerda abajo.',
+              'Descansa 60 segundos al completar ambos ejercicios.'
+            ],
+            machineSetup: 'Ten listas tus mancuernas junto a la estación de polea alta con cuerda para hacer la transición inmediata.'
+          },
+          {
+            id: 'jue_5',
+            name: 'Elevaciones de Piernas (Silla Romana o Suelo)',
+            setsCount: 3,
+            targetReps: '12-15',
+            restSeconds: 45,
+            muscleGroup: 'Abdomen Inferior',
+            shortTip: 'Enrolla la pelvis hacia arriba al subir las piernas y baja sin balancearte.',
+            formCues: [
+              'Apoya firmemente la espalda baja contra el respaldo de la silla romana (o manos bajo glúteos en suelo).',
+              'Eleva las piernas (rectas o con rodillas ligeramente flexionadas) buscando acercar el pubis hacia el ombligo.',
+              'Desciende lentamente en 2–3 segundos evitando que las piernas se balanceen.'
+            ],
+            machineSetup: 'En silla romana, apoya bien los antebrazos y sujeta los agarres frontales con hombros lejos de orejas.'
+          }
+        ]
+      },
+      {
+        id: 'viernes',
+        short: 'VIE',
+        name: 'VIERNES',
+        title: 'Isquios y Glúteo',
+        subtitle: 'Bisagra de Cadera y Estiramiento',
+        hasActivation: true,
+        isOptional: false,
+        exercises: [
+          {
+            id: 'vie_1',
+            name: 'Peso Muerto Rumano (RDL Barra o Mancuernas)',
+            setsCount: 4,
+            targetReps: '8-10',
+            restSeconds: 120,
+            muscleGroup: 'Isquios y Glúteo',
+            shortTip: 'Empuja la cadera hacia atrás con espalda plana y barra pegada a las piernas.',
+            formCues: [
+              'Desbloquea ligeramente las rodillas (15° fijos) y mantén el pecho orgulloso y la espalda totalmente plana.',
+              'Empuja la cadera hacia atrás como si quisieras cerrar una puerta con los glúteos deslizando el peso pegado a tus muslos.',
+              'Detente justo debajo de las rodillas cuando notes el estiramiento máximo de isquios y sube empujando la cadera al frente.'
+            ],
+            machineSetup: 'Usa barra olímpica o mancuernas pesadas; straps opcionales para concentrarte 100% en glúteos e isquios.'
+          },
+          {
+            id: 'vie_2',
+            name: 'Curl Femoral (Tumbado o Sentado)',
+            setsCount: 3,
+            targetReps: '12-15',
+            restSeconds: 60,
+            muscleGroup: 'Isquiotibiales',
+            shortTip: 'Mantén la cadera pegada al banco y controla la bajada en 3 segundos.',
+            formCues: [
+              'Alinea tus rodillas justo en el borde del banco pivotante de la máquina.',
+              'Flexiona las rodillas llevando el rodillo hacia los glúteos sin despegar la cadera del apoyo.',
+              'Regresa lentamente manteniendo tensión continua en la parte posterior del muslo.'
+            ],
+            machineSetup: 'Ajusta el rodillo inferior justo por encima de los talones (tendón de Aquiles).'
+          },
+          {
+            id: 'vie_3',
+            name: 'Step-Ups Altos en Cajón o Banco',
+            setsCount: 3,
+            targetReps: '10 / pierna',
+            restSeconds: 75,
+            muscleGroup: 'Glúteo Mayor',
+            shortTip: 'Inclina el torso adelante y sube empujando solo con el talón de arriba.',
+            formCues: [
+              'Coloca todo el pie de trabajo sobre el cajón e inclina el torso ligeramente hacia adelante sobre esa pierna.',
+              'Sube haciendo fuerza exclusivamente con el glúteo y talón de la pierna elevada (evita impulsarte con el pie del suelo).',
+              'Controla el descenso en 2–3 segundos hasta tocar suavemente el piso.'
+            ],
+            machineSetup: 'Usa un cajón pliométrico o banco cuya altura deje tu muslo paralelo al suelo al apoyar el pie.'
+          },
+          {
+            id: 'vie_4',
+            name: 'Hip Thrust B-Stance (Unilateral)',
+            setsCount: 3,
+            targetReps: '10 / pierna',
+            restSeconds: 90,
+            muscleGroup: 'Glúteo Unilateral',
+            shortTip: '85% del peso en el pie de trabajo; el otro pie solo apoya el talón adelante.',
+            formCues: [
+              'Colócate igual que en el Hip Thrust tradicional, pero adelanta medio pie la pierna no trabajadora apoyando solo su talón.',
+              'Concentra el 85–90% del empuje en el talón de la pierna principal manteniendo la pelvis nivelada.',
+              'Sostén 1 segundo arriba apretando el glúteo de trabajo y completa todas las reps antes de cambiar de lado.'
+            ],
+            machineSetup: 'Banco plano con almohadilla en barra o mancuerna pesada sobre la cadera.'
+          },
+          {
+            id: 'vie_5',
+            name: 'Abducción en Polea Baja',
+            setsCount: 3,
+            targetReps: '15 / pierna',
+            restSeconds: 45,
+            muscleGroup: 'Glúteo Medio',
+            shortTip: 'Cruza ligeramente por delante y barre lateralmente sin inclinar el torso.',
+            formCues: [
+              'Colócate de lado a la polea sujetando la columna para estabilizarte y cruza ligeramente la pierna externa por delante.',
+              'Eleva la pierna lateralmente hacia afuera manteniendo la punta del pie mirando al frente.',
+              'Evita inclinar el torso hacia el lado contrario; todo el movimiento nace de la cadera.'
+            ],
+            machineSetup: 'Polea en posición más baja con tobillera acolchada en el tobillo externo.'
+          }
+        ]
+      },
+      {
+        id: 'sabado',
+        short: 'SÁB',
+        name: 'SÁBADO',
+        title: 'Glúteo Pump, Core y Movilidad',
+        subtitle: 'Opcional / Día 6',
+        hasActivation: true,
+        isOptional: true,
+        exercises: [
+          {
+            id: 'sab_1',
+            name: 'Frog Pumps con Mancuerna',
+            setsCount: 3,
+            targetReps: '20-25',
+            restSeconds: 45,
+            muscleGroup: 'Bombeo Glúteo',
+            shortTip: 'Plantas de los pies juntas, rodillas abiertas y bombeo constante arriba.',
+            formCues: [
+              'Túmbate boca arriba, junta las plantas de los pies y deja caer las rodillas hacia los lados en forma de mariposa.',
+              'Apoya una mancuerna sobre la cadera y eleva la pelvis apretando glúteos con ritmo fluido y continuo.',
+              'Mantén la barbilla pegada al pecho para evitar arquear la espalda.'
+            ],
+            machineSetup: 'Colchoneta en el suelo y una mancuerna moderada apoyada sobre los pliegues pélvicos.'
+          },
+          {
+            id: 'sab_2',
+            name: 'Abducciones con Banda (3 Inclinaciones)',
+            setsCount: 3,
+            targetReps: '15 c/u',
+            restSeconds: 45,
+            muscleGroup: 'Glúteo Medio / Superior',
+            shortTip: '15 reps inclinada adelante, 15 recta y 15 inclinada atrás sin descanso.',
+            formCues: [
+              'Siéntate en el borde de un banco con los pies al ancho de hombros y la banda justo debajo de las rodillas.',
+              'Realiza 15 abducciones inclinada hacia adelante, pasa directo a 15 con el torso recto y termina con 15 inclinada ligeramente atrás.',
+              'Mantén tensión constante sin dejar que las rodillas se junten por completo.'
+            ],
+            machineSetup: 'Banda circular de tela de resistencia media-alta colocada por debajo de las rodillas.'
+          },
+          {
+            id: 'sab_3',
+            name: 'Aductores en Máquina',
+            setsCount: 3,
+            targetReps: '15',
+            restSeconds: 45,
+            muscleGroup: 'Aductores (Muslo Interno)',
+            shortTip: 'Abre hasta estiramiento cómodo y cierra apretando la cara interna del muslo.',
+            formCues: [
+              'Siéntate con la espalda bien apoyada y coloca la cara interna de las rodillas/muslos contra las almohadillas.',
+              'Cierra las piernas de forma controlada hasta juntar las almohadillas y sostén 1 segundo.',
+              'Regresa lentamente controlando la apertura.'
+            ],
+            machineSetup: 'Ajusta la apertura inicial según tu flexibilidad cómoda de cadera.'
+          },
+          {
+            id: 'sab_4',
+            name: 'Dead Bug + Estiramiento 90/90',
+            setsCount: 3,
+            targetReps: '10 / lado',
+            restSeconds: 45,
+            muscleGroup: 'Core Profundo y Cadera',
+            shortTip: 'Zona lumbar pegada al suelo en Dead Bug y termina con movilidad de cadera 90/90.',
+            formCues: [
+              'Boca arriba con brazos verticales y rodillas a 90°, presiona la zona lumbar contra la colchoneta.',
+              'Extiende simultáneamente brazo derecho atrás y pierna izquierda al frente sin que la espalda baja se arquee; alterna lados.',
+              'Al finalizar las series, realiza 45 segundos por lado de rotación de cadera 90/90 sentada en el suelo.'
+            ],
+            machineSetup: 'Colchoneta cómoda en zona de estiramiento.'
+          }
+        ]
+      }
+    ];
+
+    /**
+     * ESTADO GLOBAL DE LA APLICACIÓN
+     */
+    let appState = {
+      selectedDayId: detectCurrentDayId(),
+      weekNumber: 1,
+      activationExpanded: true,
+      days: {}
+    };
+
+    /**
+     * ESTADO DEL TEMPORIZADOR DE DESCANSO
+     */
+    let timerState = {
+      intervalId: null,
+      totalSeconds: 90,
+      remainingSeconds: 90,
+      isRunning: false,
+      label: 'Descanso'
+    };
+
+    /**
+     * DETECTA EL DÍA DE LA SEMANA ACTUAL (Lun-Sáb; Domingo -> Lunes)
+     */
+    function detectCurrentDayId() {
+      const jsDay = new Date().getDay();
+      const map = {
+        1: 'lunes',
+        2: 'martes',
+        3: 'miercoles',
+        4: 'jueves',
+        5: 'viernes',
+        6: 'sabado',
+        0: 'lunes'
+      };
+      return map[jsDay] || 'lunes';
+    }
+
+    /**
+     * CARGA Y NORMALIZA EL ESTADO DESDE LOCALSTORAGE
+     */
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appState.weekNumber = parsed.weekNumber || 1;
+          appState.activationExpanded = typeof parsed.activationExpanded === 'boolean' ? parsed.activationExpanded : true;
+          appState.days = parsed.days || {};
+        }
+      } catch (err) {
+        console.error('Error leyendo localStorage:', err);
+      }
+
+      ROUTINE_TEMPLATE.forEach(day => {
+        if (!appState.days[day.id]) {
+          appState.days[day.id] = {
+            activationChecks: [false, false, false],
+            exercises: {}
+          };
+        }
+        const dObj = appState.days[day.id];
+        if (!Array.isArray(dObj.activationChecks) || dObj.activationChecks.length !== 3) {
+          dObj.activationChecks = [false, false, false];
+        }
+        if (!dObj.exercises) dObj.exercises = {};
+
+        day.exercises.forEach(ex => {
+          if (!dObj.exercises[ex.id]) {
+            dObj.exercises[ex.id] = {
+              sets: Array.from({ length: ex.setsCount }, () => ({
+                weight: '',
+                reps: ex.targetReps,
+                done: false
+              })),
+              note: '',
+              noteOpen: false
+            };
+          } else {
+            const exState = dObj.exercises[ex.id];
+            if (!Array.isArray(exState.sets) || exState.sets.length === 0) {
+              exState.sets = Array.from({ length: ex.setsCount }, () => ({
+                weight: '',
+                reps: ex.targetReps,
+                done: false
+              }));
+            }
+            if (typeof exState.note !== 'string') exState.note = '';
+            if (typeof exState.noteOpen !== 'boolean') exState.noteOpen = Boolean(exState.note.trim());
+          }
+        });
+      });
+
+      saveState();
+    }
+
+    /**
+     * GUARDA EL ESTADO EN LOCALSTORAGE
+     */
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          weekNumber: appState.weekNumber,
+          activationExpanded: appState.activationExpanded,
+          days: appState.days
+        }));
+      } catch (err) {
+        console.error('Error guardando en localStorage:', err);
+      }
+    }
+
+    /**
+     * NOTIFICACIÓN TOAST BREVE
+     */
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const text = document.getElementById('toastMessage');
+      text.textContent = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2400);
+    }
+
+    /**
+     * ESCAPA CARACTERES HTML
+     */
+    function escapeHtml(val) {
+      if (val === null || val === undefined) return '';
+      return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    /**
+     * CALCULA PORCENTAJES DE PROGRESO DIARIO Y SEMANAL
+     */
+    function calculateProgress() {
+      let weeklyTotal = 0;
+      let weeklyDone = 0;
+      const perDay = {};
+
+      ROUTINE_TEMPLATE.forEach(day => {
+        const dData = appState.days[day.id];
+        let dayTotal = 0;
+        let dayDone = 0;
+
+        day.exercises.forEach(ex => {
+          const sets = dData.exercises[ex.id]?.sets || [];
+          sets.forEach(s => {
+            dayTotal++;
+            weeklyTotal++;
+            if (s.done) {
+              dayDone++;
+              weeklyDone++;
+            }
+          });
+        });
+
+        perDay[day.id] = {
+          total: dayTotal,
+          done: dayDone,
+          percent: dayTotal > 0 ? Math.round((dayDone / dayTotal) * 100) : 0
+        };
+      });
+
+      return {
+        perDay,
+        weeklyPercent: weeklyTotal > 0 ? Math.round((weeklyDone / weeklyTotal) * 100) : 0
+      };
+    }
+
+    /**
+     * ACTUALIZA BARRAS DE PROGRESO Y PESTAÑAS DE DÍAS
+     */
+    function renderHeaderAndTabs() {
+      const { perDay, weeklyPercent } = calculateProgress();
+      const todayStats = perDay[appState.selectedDayId] || { total: 0, done: 0, percent: 0 };
+
+      document.getElementById('weekNumberBadge').textContent = appState.weekNumber;
+      document.getElementById('dailyProgressText').textContent = `${todayStats.percent}%`;
+      document.getElementById('dailyProgressBar').style.width = `${todayStats.percent}%`;
+      document.getElementById('weeklyProgressText').textContent = `${weeklyPercent}%`;
+      document.getElementById('weeklyProgressBar').style.width = `${weeklyPercent}%`;
+      document.getElementById('daySetsCounter').textContent = `${todayStats.done} / ${todayStats.total}`;
+
+      const nav = document.getElementById('daySelector');
+      nav.innerHTML = '';
+
+      ROUTINE_TEMPLATE.forEach(day => {
+        const isSelected = day.id === appState.selectedDayId;
+        const stats = perDay[day.id];
+        const isComplete = stats.percent === 100 && stats.total > 0;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `flex flex-col items-center justify-center py-2 px-1 rounded-xl border transition active:scale-95 ${
+          isSelected
+            ? 'bg-[#f43f5e]/15 border-[#f43f5e] text-white shadow-sm'
+            : 'bg-[#131318] border-[#272732] text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+        }`;
+
+        btn.innerHTML = `
+          <span class="text-[11px] font-extrabold tracking-wide ${isSelected ? 'text-[#fb7185]' : ''}">${day.short}</span>
+          <div class="w-6 h-1 bg-[#1e1e26] rounded-full mt-1 overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-300 ${
+              isComplete ? 'bg-[#10b981]' : isSelected ? 'bg-[#f43f5e]' : 'bg-zinc-600'
+            }" style="width: ${stats.percent}%"></div>
+          </div>
+        `;
+
+        btn.addEventListener('click', () => {
+          appState.selectedDayId = day.id;
+          renderAll();
+        });
+
+        nav.appendChild(btn);
+      });
+    }
+
+    /**
+     * ABRE EL MODAL DE VISTA AMPLIADA DE LA ILUSTRACIÓN SVG Y DETALLES TÉCNICOS
+     */
+    function openIllustrationZoomModal(exerciseObj) {
+      const modal = document.getElementById('modalIllustrationZoom');
+      document.getElementById('zoomMuscleBadge').textContent = exerciseObj.muscleGroup;
+      document.getElementById('zoomMetaBadge').textContent = `${exerciseObj.setsCount} series × ${exerciseObj.targetReps} • ${exerciseObj.restSeconds}s`;
+      document.getElementById('zoomModalTitle').textContent = exerciseObj.name;
+      document.getElementById('zoomSvgContainer').innerHTML = EXERCISE_SVGS[exerciseObj.id] || '';
+      document.getElementById('zoomMachineSetup').textContent = exerciseObj.machineSetup;
+
+      const cuesList = document.getElementById('zoomFormCuesList');
+      cuesList.innerHTML = exerciseObj.formCues
+        .map(cue => `<li>${escapeHtml(cue)}</li>`)
+        .join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeIllustrationZoomModal() {
+      document.getElementById('modalIllustrationZoom').classList.add('hidden');
+    }
+
+    /**
+     * RENDERIZA EL DÍA SELECCIONADO CON SUS TARJETAS E ILUSTRACIONES SVG
+     */
+    function renderSelectedDay() {
+      const dayTemplate = ROUTINE_TEMPLATE.find(d => d.id === appState.selectedDayId) || ROUTINE_TEMPLATE[0];
+      const dayData = appState.days[dayTemplate.id];
+
+      document.getElementById('dayBadge').textContent = dayTemplate.name;
+      document.getElementById('dayTitle').textContent = dayTemplate.title;
+      document.getElementById('daySubtitle').textContent = dayTemplate.subtitle;
+
+      const optBadge = document.getElementById('dayOptionalBadge');
+      if (dayTemplate.isOptional) {
+        optBadge.classList.remove('hidden');
+      } else {
+        optBadge.classList.add('hidden');
+      }
+
+      // Checklist de activación pre-entreno en días de tren inferior
+      const activationSection = document.getElementById('activationSection');
+      if (dayTemplate.hasActivation) {
+        activationSection.classList.remove('hidden');
+        const body = document.getElementById('activationBody');
+        const chevron = document.getElementById('activationChevron');
+        const toggleBtn = document.getElementById('toggleActivationBtn');
+
+        toggleBtn.setAttribute('aria-expanded', String(appState.activationExpanded));
+        if (appState.activationExpanded) {
+          body.classList.remove('hidden');
+          chevron.classList.add('rotate-180');
+        } else {
+          body.classList.add('hidden');
+          chevron.classList.remove('rotate-180');
+        }
+
+        const checkboxes = document.querySelectorAll('.activation-checkbox');
+        let checkedCount = 0;
+        checkboxes.forEach((cb, idx) => {
+          const isChecked = Boolean(dayData.activationChecks[idx]);
+          cb.checked = isChecked;
+          if (isChecked) checkedCount++;
+        });
+
+        const badge = document.getElementById('activationProgressBadge');
+        badge.textContent = `${checkedCount}/3`;
+        badge.className = `text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-[#1e1e26] border tabular-nums ${
+          checkedCount === 3
+            ? 'border-[#10b981]/50 text-[#10b981]'
+            : 'border-[#272732] text-zinc-300'
+        }`;
+      } else {
+        activationSection.classList.add('hidden');
+      }
+
+      // Renderizado de tarjetas de ejercicios
+      const container = document.getElementById('exercisesContainer');
+      container.innerHTML = '';
+
+      dayTemplate.exercises.forEach((ex, index) => {
+        const exState = dayData.exercises[ex.id];
+        const sets = exState.sets;
+        const doneCount = sets.filter(s => s.done).length;
+        const isExerciseComplete = doneCount === sets.length && sets.length > 0;
+        const hasNote = Boolean(exState.note && exState.note.trim().length > 0);
+        const svgMarkup = EXERCISE_SVGS[ex.id] || '';
+
+        const card = document.createElement('article');
+        card.className = `rounded-2xl border transition-all p-4 ${
+          isExerciseComplete
+            ? 'bg-[#131318] border-[#10b981]/50'
+            : 'bg-[#131318] border-[#272732]'
+        }`;
+
+        // Bloque superior: Ilustración SVG interactiva + Información del ejercicio
+        const topSectionHtml = `
+          <div class="flex flex-col sm:flex-row gap-3.5 items-stretch">
+            <!-- Ilustración SVG Estática (Tocar para ampliar) -->
+            <button
+              type="button"
+              data-zoom-ex="${ex.id}"
+              aria-label="Ampliar ilustración y técnica de ${escapeHtml(ex.name)}"
+              class="group relative w-full sm:w-44 h-32 sm:h-28 rounded-xl bg-[#09090b] border border-[#272732] hover:border-[#f43f5e]/60 p-1.5 flex items-center justify-center shrink-0 overflow-hidden transition active:scale-[0.98]"
+            >
+              <div class="w-full h-full">
+                ${svgMarkup}
+              </div>
+              <span class="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-md bg-[#1e1e26]/90 border border-[#272732] text-[10px] font-bold text-zinc-300 group-hover:text-[#fb7185] flex items-center gap-1 transition">
+                <svg class="w-3 h-3 text-[#f43f5e]" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16zm0-11v6m-3-3h6" />
+                </svg>
+                Ver técnica
+              </span>
+            </button>
+
+            <!-- Título, Grupo Muscular, Descanso y Tip Rápido -->
+            <div class="flex-1 min-w-0 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-black ${
+                      isExerciseComplete
+                        ? 'bg-[#10b981] text-[#09090b]'
+                        : 'bg-[#1e1e26] border border-[#272732] text-[#fb7185]'
+                    }">
+                      ${index + 1}
+                    </span>
+                    <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#f43f5e]/15 text-[#fb7185] border border-[#f43f5e]/30">
+                      ${ex.muscleGroup}
+                    </span>
+                    <span class="text-[11px] font-bold text-zinc-400">
+                      ${ex.setsCount} × ${ex.targetReps}
+                    </span>
+                  </div>
+
+                  <!-- Botón descanso rápido -->
+                  <button
+                    type="button"
+                    data-start-timer="${ex.restSeconds}"
+                    data-ex-name="${escapeHtml(ex.name)}"
+                    title="Iniciar descanso de ${ex.restSeconds}s"
+                    class="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] hover:border-[#f43f5e]/50 text-xs font-bold text-zinc-300 hover:text-[#fb7185] flex items-center gap-1 transition active:scale-95"
+                  >
+                    <svg class="w-3.5 h-3.5 text-[#f43f5e]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="13" r="8"></circle>
+                      <path stroke-linecap="round" d="M12 9v4l2 2M9 2h6"></path>
+                    </svg>
+                    <span class="tabular-nums">${ex.restSeconds}s</span>
+                  </button>
+                </div>
+
+                <h3 class="text-sm sm:text-base font-extrabold text-white leading-snug mt-1.5">
+                  ${ex.name}
+                </h3>
+              </div>
+
+              <p class="mt-2 text-xs text-zinc-300 bg-[#1e1e26]/75 border border-[#272732] rounded-xl px-2.5 py-2 leading-relaxed">
+                <span class="text-[#fb7185] font-bold">Cue:</span> ${ex.shortTip}
+              </p>
+            </div>
+          </div>
+        `;
+
+        // Cabecera de columnas de series
+        const tableHeadHtml = `
+          <div class="grid grid-cols-12 gap-2 items-center mt-3.5 mb-1.5 px-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+            <div class="col-span-2">Serie</div>
+            <div class="col-span-4 text-center">Peso (kg)</div>
+            <div class="col-span-4 text-center">Reps / Seg</div>
+            <div class="col-span-2 text-right">Hecho</div>
+          </div>
+        `;
+
+        // Filas por serie
+        const rowsHtml = sets
+          .map((sObj, sIdx) => {
+            return `
+              <div class="grid grid-cols-12 gap-2 items-center p-1.5 rounded-xl transition ${
+                sObj.done
+                  ? 'bg-[#10b981]/10 border border-[#10b981]/40'
+                  : 'bg-[#1e1e26]/75 border border-[#272732]'
+              }">
+                <div class="col-span-2 pl-1.5">
+                  <span class="text-xs font-extrabold ${
+                    sObj.done ? 'text-[#10b981]' : 'text-zinc-400'
+                  }">
+                    S${sIdx + 1}
+                  </span>
+                </div>
+
+                <div class="col-span-4">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    inputmode="decimal"
+                    data-ex-id="${ex.id}"
+                    data-set-idx="${sIdx}"
+                    data-field="weight"
+                    value="${escapeHtml(sObj.weight)}"
+                    placeholder="0 kg"
+                    aria-label="Peso en kg serie ${sIdx + 1}"
+                    class="set-input w-full py-2.5 px-2 rounded-lg bg-[#09090b] border border-[#272732] focus:border-[#f43f5e] focus:outline-none text-center text-sm font-bold text-white placeholder-zinc-600 tabular-nums"
+                  />
+                </div>
+
+                <div class="col-span-4">
+                  <input
+                    type="text"
+                    data-ex-id="${ex.id}"
+                    data-set-idx="${sIdx}"
+                    data-field="reps"
+                    value="${escapeHtml(sObj.reps)}"
+                    placeholder="${escapeHtml(ex.targetReps)}"
+                    aria-label="Repeticiones serie ${sIdx + 1}"
+                    class="set-input w-full py-2.5 px-2 rounded-lg bg-[#09090b] border border-[#272732] focus:border-[#f43f5e] focus:outline-none text-center text-xs sm:text-sm font-semibold text-zinc-200 placeholder-zinc-600 tabular-nums"
+                  />
+                </div>
+
+                <div class="col-span-2 flex justify-end">
+                  <button
+                    type="button"
+                    data-toggle-set="${ex.id}"
+                    data-set-idx="${sIdx}"
+                    data-rest="${ex.restSeconds}"
+                    data-ex-name="${escapeHtml(ex.name)}"
+                    aria-pressed="${sObj.done}"
+                    aria-label="Marcar serie ${sIdx + 1} completada"
+                    class="w-11 h-11 rounded-xl flex items-center justify-center transition active:scale-90 ${
+                      sObj.done
+                        ? 'bg-[#10b981] text-[#09090b] shadow-md shadow-emerald-500/25'
+                        : 'bg-[#09090b] hover:bg-[#272732] border border-[#272732] text-zinc-400'
+                    }"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+
+        // Pie de tarjeta: + Serie / - Serie y Notas / Configuración de Máquina
+        const footerHtml = `
+          <div class="mt-3 pt-2.5 border-t border-[#272732] flex flex-wrap items-center justify-between gap-2">
+            <button
+              type="button"
+              data-toggle-note="${ex.id}"
+              class="px-2.5 py-1.5 rounded-lg bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-[11px] font-semibold flex items-center gap-1.5 transition ${
+                hasNote ? 'text-[#fb7185] border-[#f43f5e]/40' : 'text-zinc-400 hover:text-zinc-200'
+              }"
+            >
+              <svg class="w-3.5 h-3.5 ${hasNote ? 'text-[#f43f5e]' : 'text-zinc-400'}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span>Notas / Ajuste Máquina</span>
+              ${hasNote ? '<span class="w-1.5 h-1.5 rounded-full bg-[#f43f5e]"></span>' : ''}
+            </button>
+
+            <div class="flex items-center gap-1.5">
+              ${
+                sets.length > 1
+                  ? `<button type="button" data-remove-set="${ex.id}" class="px-2.5 py-1.5 rounded-lg bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-[11px] font-bold text-zinc-400 hover:text-[#fb7185] transition active:scale-95">
+                      - Serie
+                    </button>`
+                  : ''
+              }
+              <button type="button" data-add-set="${ex.id}" class="px-2.5 py-1.5 rounded-lg bg-[#1e1e26] hover:bg-[#272732] border border-[#272732] text-[11px] font-bold text-zinc-300 hover:text-[#10b981] transition active:scale-95">
+                + Serie
+              </button>
+            </div>
+          </div>
+
+          <div id="noteBox_${ex.id}" class="${exState.noteOpen ? 'mt-2.5' : 'hidden'}">
+            <input
+              type="text"
+              data-note-input="${ex.id}"
+              value="${escapeHtml(exState.note)}"
+              placeholder="Ej. Asiento en punto 3, banda fuerte, pies arriba..."
+              class="exercise-note-input w-full px-3 py-2.5 rounded-xl bg-[#09090b] border border-[#272732] focus:border-[#f43f5e] focus:outline-none text-xs text-zinc-200 placeholder-zinc-600"
+            />
+          </div>
+        `;
+
+        card.innerHTML =
+          topSectionHtml +
+          tableHeadHtml +
+          `<div class="space-y-2">${rowsHtml}</div>` +
+          footerHtml;
+
+        container.appendChild(card);
+      });
+
+      bindCardEvents(dayTemplate);
+    }
+
+    /**
+     * VINCULA EVENTOS DE ILUSTRACIONES ZOOM, SERIES, NOTAS Y TEMPORIZADOR
+     */
+    function bindCardEvents(dayTemplate) {
+      const dayData = appState.days[dayTemplate.id];
+
+      // Tocar ilustración SVG -> Abrir Modal Zoom
+      document.querySelectorAll('[data-zoom-ex]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const exId = e.currentTarget.dataset.zoomEx;
+          const exObj = dayTemplate.exercises.find(item => item.id === exId);
+          if (exObj) {
+            openIllustrationZoomModal(exObj);
+          }
+        });
+      });
+
+      // Inputs peso y repeticiones
+      document.querySelectorAll('.set-input').forEach(input => {
+        input.addEventListener('input', e => {
+          const exId = e.target.dataset.exId;
+          const sIdx = parseInt(e.target.dataset.setIdx, 10);
+          const field = e.target.dataset.field;
+          if (dayData.exercises[exId] && dayData.exercises[exId].sets[sIdx]) {
+            dayData.exercises[exId].sets[sIdx][field] = e.target.value;
+            saveState();
+          }
+        });
+      });
+
+      // Checkbox serie completada -> dispara temporizador inteligente
+      document.querySelectorAll('[data-toggle-set]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const button = e.currentTarget;
+          const exId = button.dataset.toggleSet;
+          const sIdx = parseInt(button.dataset.setIdx, 10);
+          const restSecs = parseInt(button.dataset.rest, 10) || 60;
+          const exName = button.dataset.exName || 'Descanso';
+
+          const setObj = dayData.exercises[exId].sets[sIdx];
+          setObj.done = !setObj.done;
+          saveState();
+
+          renderHeaderAndTabs();
+          renderSelectedDay();
+
+          if (setObj.done) {
+            startRestTimer(restSecs, exName);
+          }
+        });
+      });
+
+      // Iniciar descanso manual por ejercicio
+      document.querySelectorAll('[data-start-timer]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const secs = parseInt(e.currentTarget.dataset.startTimer, 10) || 60;
+          const exName = e.currentTarget.dataset.exName || 'Descanso';
+          startRestTimer(secs, exName);
+        });
+      });
+
+      // + Serie
+      document.querySelectorAll('[data-add-set]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const exId = e.currentTarget.dataset.addSet;
+          const sets = dayData.exercises[exId].sets;
+          const prev = sets[sets.length - 1] || { weight: '', reps: '' };
+          sets.push({
+            weight: prev.weight,
+            reps: prev.reps,
+            done: false
+          });
+          saveState();
+          renderHeaderAndTabs();
+          renderSelectedDay();
+          showToast('+1 Serie añadida');
+        });
+      });
+
+      // - Serie
+      document.querySelectorAll('[data-remove-set]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const exId = e.currentTarget.dataset.removeSet;
+          const sets = dayData.exercises[exId].sets;
+          if (sets.length > 1) {
+            sets.pop();
+            saveState();
+            renderHeaderAndTabs();
+            renderSelectedDay();
+            showToast('-1 Serie eliminada');
+          }
+        });
+      });
+
+      // Mostrar/ocultar Notas / Ajuste Máquina
+      document.querySelectorAll('[data-toggle-note]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const exId = e.currentTarget.dataset.toggleNote;
+          const exState = dayData.exercises[exId];
+          exState.noteOpen = !exState.noteOpen;
+          saveState();
+          renderSelectedDay();
+          if (exState.noteOpen) {
+            const input = document.querySelector(`[data-note-input="${exId}"]`);
+            if (input) input.focus();
+          }
+        });
+      });
+
+      // Autoguardado de Notas
+      document.querySelectorAll('.exercise-note-input').forEach(input => {
+        input.addEventListener('input', e => {
+          const exId = e.target.dataset.noteInput;
+          dayData.exercises[exId].note = e.target.value;
+          saveState();
+        });
+      });
+    }
+
+    /**
+     * ==================== TEMPORIZADOR FLOTANTE + SONIDO WEB AUDIO API ====================
+     */
+    function playFinishChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const notes = [783.99, 987.77, 1174.66]; // Acorde suave G5-B5-D6
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.16);
+          gain.gain.setValueAtTime(0.22, ctx.currentTime + idx * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.16 + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.16);
+          osc.stop(ctx.currentTime + idx * 0.16 + 0.19);
+        });
+      } catch (err) {
+        // Ignorar si el navegador restringe audio
+      }
+    }
+
+    function formatMMSS(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+    }
+
+    function updateTimerUI() {
+      const bar = document.getElementById('restTimerBar');
+      const card = document.getElementById('restTimerCard');
+      const display = document.getElementById('timerDisplay');
+      const progress = document.getElementById('timerProgressBar');
+      const label = document.getElementById('timerExerciseLabel');
+      const finishedBadge = document.getElementById('timerFinishedBadge');
+      const statusDot = document.getElementById('timerStatusDot');
+      const iconPause = document.getElementById('iconTimerPause');
+      const iconPlay = document.getElementById('iconTimerPlay');
+      const textToggle = document.getElementById('textTimerToggle');
+
+      bar.classList.remove('hidden');
+      label.textContent = timerState.label;
+      display.textContent = formatMMSS(timerState.remainingSeconds);
+
+      const pct = timerState.totalSeconds > 0
+        ? Math.max(0, Math.min(100, (timerState.remainingSeconds / timerState.totalSeconds) * 100))
+        : 0;
+      progress.style.width = `${pct}%`;
+
+      if (timerState.remainingSeconds === 0) {
+        finishedBadge.classList.remove('hidden');
+        card.classList.remove('border-[#f43f5e]/50', 'glow-rose');
+        card.classList.add('border-[#10b981]', 'glow-emerald');
+        statusDot.classList.remove('bg-[#f43f5e]');
+        statusDot.classList.add('bg-[#10b981]');
+      } else {
+        finishedBadge.classList.add('hidden');
+        card.classList.add('border-[#f43f5e]/50', 'glow-rose');
+        card.classList.remove('border-[#10b981]', 'glow-emerald');
+        statusDot.classList.add('bg-[#f43f5e]');
+        statusDot.classList.remove('bg-[#10b981]');
+      }
+
+      if (timerState.isRunning) {
+        iconPause.classList.remove('hidden');
+        iconPlay.classList.add('hidden');
+        textToggle.textContent = 'Pausar';
+      } else {
+        iconPause.classList.add('hidden');
+        iconPlay.classList.remove('hidden');
+        textToggle.textContent = 'Reanudar';
+      }
+    }
+
+    function runTimerTick() {
+      clearInterval(timerState.intervalId);
+      timerState.intervalId = setInterval(() => {
+        if (!timerState.isRunning) return;
+        if (timerState.remainingSeconds > 0) {
+          timerState.remainingSeconds--;
+          updateTimerUI();
+
+          if (timerState.remainingSeconds === 0) {
+            timerState.isRunning = false;
+            clearInterval(timerState.intervalId);
+            updateTimerUI();
+            playFinishChime();
+            if (navigator.vibrate) {
+              navigator.vibrate([250, 120, 250, 120, 350]);
+            }
+          }
+        }
+      }, 1000);
+    }
+
+    function startRestTimer(seconds, label = 'Descanso') {
+      timerState.totalSeconds = seconds;
+      timerState.remainingSeconds = seconds;
+      timerState.label = label;
+      timerState.isRunning = true;
+      updateTimerUI();
+      runTimerTick();
+    }
+
+    /**
+     * CONSTRUYE EL RESUMEN FORMATEADO DE TEXTO PARA COMPARTIR O COPIAR
+     */
+    function buildWeeklySummaryText() {
+      const { weeklyPercent } = calculateProgress();
+      const lines = [
+        `🍑 GLUTE & LEG HYPERTROPHY TRACKER — SARA`,
+        `📅 Semana ${appState.weekNumber} • Progreso Semanal: ${weeklyPercent}%`,
+        `========================================`
+      ];
+
+      ROUTINE_TEMPLATE.forEach(day => {
+        const dData = appState.days[day.id];
+        lines.push(`\n▶ ${day.name}: ${day.title} (${day.subtitle})`);
+        day.exercises.forEach((ex, i) => {
+          const exState = dData.exercises[ex.id];
+          const sets = exState.sets || [];
+          const doneCount = sets.filter(s => s.done).length;
+          const setsText = sets
+            .map((s, idx) => `S${idx + 1}: ${s.weight ? s.weight + 'kg' : '-'} × ${s.reps || ex.targetReps}${s.done ? '✓' : ''}`)
+            .join(' | ');
+          lines.push(`  ${i + 1}. ${ex.name} [${doneCount}/${sets.length}] -> ${setsText}`);
+          if (exState.note && exState.note.trim()) {
+            lines.push(`     📝 Nota: ${exState.note.trim()}`);
+          }
+        });
+      });
+
+      return lines.join('\n');
+    }
+
+    /**
+     * RENDERIZADO GENERAL
+     */
+    function renderAll() {
+      renderHeaderAndTabs();
+      renderSelectedDay();
+    }
+
+    /**
+     * EVENTOS GLOBALES
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderAll();
+
+      // Colapsar/Expandir Activación Pre-Entreno
+      document.getElementById('toggleActivationBtn').addEventListener('click', () => {
+        appState.activationExpanded = !appState.activationExpanded;
+        saveState();
+        renderSelectedDay();
+      });
+
+      // Checkboxes Activación Pre-Entreno
+      document.querySelectorAll('.activation-checkbox').forEach((cb, idx) => {
+        cb.addEventListener('change', e => {
+          const dayData = appState.days[appState.selectedDayId];
+          dayData.activationChecks[idx] = e.target.checked;
+          saveState();
+          renderSelectedDay();
+        });
+      });
+
+      // Cerrar Modal Zoom Ilustración
+      const zoomModal = document.getElementById('modalIllustrationZoom');
+      document.getElementById('btnCloseZoomModal').addEventListener('click', closeIllustrationZoomModal);
+      document.getElementById('btnBottomCloseZoom').addEventListener('click', closeIllustrationZoomModal);
+      zoomModal.addEventListener('click', e => {
+        if (e.target === zoomModal) closeIllustrationZoomModal();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !zoomModal.classList.contains('hidden')) {
+          closeIllustrationZoomModal();
+        }
+      });
+
+      // Controles Temporizador Flotante
+      document.getElementById('btnOpenTimer').addEventListener('click', () => {
+        if (timerState.remainingSeconds <= 0) {
+          startRestTimer(60, 'Descanso Manual');
+        } else {
+          document.getElementById('restTimerBar').classList.remove('hidden');
+          updateTimerUI();
+        }
+      });
+
+      document.getElementById('btnTimerMinus15').addEventListener('click', () => {
+        timerState.remainingSeconds = Math.max(0, timerState.remainingSeconds - 15);
+        updateTimerUI();
+      });
+
+      document.getElementById('btnTimerPlus15').addEventListener('click', () => {
+        timerState.remainingSeconds += 15;
+        if (timerState.remainingSeconds > timerState.totalSeconds) {
+          timerState.totalSeconds = timerState.remainingSeconds;
+        }
+        updateTimerUI();
+      });
+
+      document.getElementById('btnTimerToggle').addEventListener('click', () => {
+        if (timerState.remainingSeconds === 0) {
+          startRestTimer(timerState.totalSeconds || 60, timerState.label);
+          return;
+        }
+        timerState.isRunning = !timerState.isRunning;
+        if (timerState.isRunning) {
+          runTimerTick();
+        } else {
+          clearInterval(timerState.intervalId);
+        }
+        updateTimerUI();
+      });
+
+      document.getElementById('btnTimerClose').addEventListener('click', () => {
+        timerState.isRunning = false;
+        clearInterval(timerState.intervalId);
+        document.getElementById('restTimerBar').classList.add('hidden');
+      });
+
+      // Modal + Nueva Semana
+      const modalNewWeek = document.getElementById('modalNewWeek');
+      document.getElementById('btnNewWeek').addEventListener('click', () => {
+        document.getElementById('nextWeekPreview').textContent = appState.weekNumber + 1;
+        modalNewWeek.classList.remove('hidden');
+      });
+
+      document.getElementById('btnCancelNewWeek').addEventListener('click', () => {
+        modalNewWeek.classList.add('hidden');
+      });
+
+      document.getElementById('btnConfirmNewWeek').addEventListener('click', () => {
+        ROUTINE_TEMPLATE.forEach(day => {
+          const dData = appState.days[day.id];
+          dData.activationChecks = [false, false, false];
+          day.exercises.forEach(ex => {
+            dData.exercises[ex.id].sets.forEach(s => {
+              s.done = false;
+            });
+          });
+        });
+        appState.weekNumber += 1;
+        saveState();
+        modalNewWeek.classList.add('hidden');
+        renderAll();
+        showToast(`¡Semana ${appState.weekNumber} iniciada! Checks reiniciados ✨`);
+      });
+
+      // Modal Backup / Resumen
+      const modalExport = document.getElementById('modalExport');
+      document.getElementById('btnExport').addEventListener('click', () => {
+        document.getElementById('exportSummaryText').value = buildWeeklySummaryText();
+        modalExport.classList.remove('hidden');
+      });
+
+      document.getElementById('btnCloseExport').addEventListener('click', () => {
+        modalExport.classList.add('hidden');
+      });
+
+      // Copiar resumen usando document.execCommand('copy') para compatibilidad en iFrames
+      document.getElementById('btnCopySummary').addEventListener('click', () => {
+        const textarea = document.getElementById('exportSummaryText');
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        try {
+          document.execCommand('copy');
+          showToast('Resumen copiado al portapapeles ✓');
+        } catch (err) {
+          showToast('No se pudo copiar el texto');
+        }
+      });
+
+      // Exportar JSON
+      document.getElementById('btnDownloadJson').addEventListener('click', () => {
+        const jsonStr = JSON.stringify(appState, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        link.href = url;
+        link.download = `sara_glute_visual_semana${appState.weekNumber}_${dateStr}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showToast('Respaldo .JSON descargado ✓');
+      });
+
+      // Importar JSON
+      document.getElementById('inputRestoreJson').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (imported && imported.days) {
+              appState.weekNumber = imported.weekNumber || 1;
+              appState.activationExpanded = typeof imported.activationExpanded === 'boolean' ? imported.activationExpanded : true;
+              appState.days = imported.days;
+              saveState();
+              loadState();
+              renderAll();
+              modalExport.classList.add('hidden');
+              showToast('Respaldo restaurado correctamente ✓');
+            } else {
+              showToast('El archivo JSON no es válido');
+            }
+          } catch (err) {
+            showToast('Error al leer el archivo');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+    });
+  </script>
+</body>
+</html>
